@@ -6,6 +6,7 @@ var controllers = require('./lib/controllers'),
 	async = module.parent.require('async'),
 	winston = module.parent.require('winston'),
 	templates = module.parent.require('templates.js'),
+	postCache = module.parent.require('./posts/cache'),
 	LRU = require('lru-cache'),
 
 	iframely = {
@@ -15,16 +16,16 @@ var controllers = require('./lib/controllers'),
 			maxAge: 1000*60*60*24	// one day
 		}),
 		htmlRegex: /<a.+?href="(.+?)".*?>.*?<\/a>/g
-	};
+	},
+	app;
 
 iframely.init = function(params, callback) {
 	var router = params.router,
 		hostMiddleware = params.middleware,
 		hostControllers = params.controllers;
-		
-	// We create two routes for every view. One API call, and the actual route itself.
-	// Just add the buildHeader middleware to your route and NodeBB will take care of everything for you.
 
+	app = params.app;
+		
 	router.get('/admin/plugins/iframely', hostMiddleware.admin.buildHeader, controllers.renderAdminPage);
 	router.get('/api/admin/plugins/iframely', controllers.renderAdminPage);
 
@@ -33,6 +34,14 @@ iframely.init = function(params, callback) {
 	});
 
 	callback();
+};
+
+iframely.updateConfig = function(data) {
+	if (data.plugin === 'iframely') {
+		winston.verbose('[plugin/iframely] Config updated');
+		postCache.reset();
+		iframely.config = data.settings;
+	}
 };
 
 iframely.addAdminNavigation = function(header, callback) {
@@ -77,8 +86,13 @@ iframely.replace = function(raw, callback) {
 			function(embeds, next) {
 				async.reduce(embeds.filter(Boolean), raw, function(html, embed, next) {
 					var replaceRegex = new RegExp('<a.+?href="' + embed.url.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&") + '".*?>.*?</a>', 'g');
-					if (!iframely.config.simple) {
-						templates.parse('partials/iframely-embed', embed, function(parsed) {
+					if (iframely.config.simple !== 'on') {
+						app.render('partials/iframely-embed', embed, function(err, parsed) {
+							if (err) {
+								winston.error('[plugin/iframely] Could not parse embed! ' + err.message);
+								return next(null, html);
+							}
+
 							next(null, html.replace(replaceRegex, parsed));
 						});
 					} else {
