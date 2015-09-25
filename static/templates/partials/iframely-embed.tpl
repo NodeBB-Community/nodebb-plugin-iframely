@@ -6,7 +6,7 @@
 			<!-- IF @first -->
 			<div class="media-left">
 				<a href="{url}" target="_blank">
-					<img class="img-thumbnail media-object" src="{links.thumbnail.href}" alt="{meta.title}" />
+					<img class="media-object" src="{links.thumbnail.href}" alt="{meta.title}" />
 				</a>
 			</div>
 			<!-- ENDIF @first -->
