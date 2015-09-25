@@ -12,6 +12,7 @@ var controllers = require('./lib/controllers'),
 	iframely = {
 		config: undefined,
 		apiBase: 'http://nodebb.iframe.ly/api',
+		apiBaseWithKey: 'https://iframe.ly/api',
 		cache: LRU({
 			maxAge: 1000*60*60*24	// one day
 		}),
@@ -113,7 +114,7 @@ iframely.query = function(url, callback) {
 	} else {
 		winston.verbose('[plugin/iframely] Querying \'' + url + '\' via iFramely...')
 		request({
-			url: iframely.apiBase + '/iframely?url=' + url,
+			url: iframely[iframely.config.key ? 'apiBaseWithKey' : 'apiBase'] + '/iframely?url=' + url + (iframely.config.key ? '?api_key=' + iframely.config.key : ''),
 			json: true
 		}, function(err, res, body) {
 			if (err) {
