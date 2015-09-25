@@ -17,7 +17,7 @@
 					<!-- IF links.icon.length -->
 					<!-- BEGIN links.icon -->
 					<!-- IF @first -->
-					<img src="{../href}" class="pull-right" />
+					<img src="{../href}" class="thumb pull-right" />
 					<!-- ENDIF @first -->
 					<!-- END links.icon -->
 					<!-- ENDIF links.icon.length -->
