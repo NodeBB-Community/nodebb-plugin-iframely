@@ -1,19 +1,17 @@
 {
-	"id": "nodebb-plugin-quickstart",
-	"url": "https://github.com/NodeBB/nodebb-plugin-quickstart",
+	"id": "nodebb-plugin-iframely",
+	"url": "https://github.com/NodeBB/nodebb-plugin-iframely",
 	"library": "./library.js",
 	"hooks": [
 		{ "hook": "static:app.load", "method": "init" },
-		{ "hook": "filter:admin.header.build", "method": "addAdminNavigation" }
+		{ "hook": "filter:admin.header.build", "method": "addAdminNavigation" },
+		{ "hook": "filter:parse.raw", "method": "replace" },
+		{ "hook": "filter:parse.post", "method": "replace" }
 	],
-	"staticDirs": {
-		"static": "./static"
-	},
 	"less": [
 		"static/style.less"
 	],
 	"scripts": [
-		"static/lib/main.js",
 		"static/lib/admin.js"
 	],
 	"templates": "static/templates"

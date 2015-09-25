@@ -1,15 +1,16 @@
 {
-  "name": "nodebb-plugin-quickstart",
+  "name": "nodebb-plugin-iframely",
   "version": "0.0.0",
   "description": "",
   "main": "library.js",
   "repository": {
     "type": "git",
-    "url": "https://github.com/julianlam/nodebb-plugin-quickstart"
+    "url": "https://github.com/NodeBB/nodebb-plugin-iframely"
   },
   "keywords": [
     "nodebb",
-    "plugin"
+    "plugin",
+    "iframely"
   ],
   "author": {
     "name": "Julian Lam",
@@ -17,10 +18,13 @@
   },
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/julianlam/nodebb-plugin-quickstart/issues"
+    "url": "https://github.com/NodeBB/nodebb-plugin-iframely/issues"
   },
   "readmeFilename": "README.md",
   "nbbpm": {
     "compatibility": "^0.6.0 || ^0.7.0 || ^0.8.0"
+  },
+  "dependencies": {
+    "lru-cache": "^2.7.0"
   }
 }
