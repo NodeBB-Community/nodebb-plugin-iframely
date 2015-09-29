@@ -97,7 +97,11 @@ iframely.replace = function(raw, callback) {
 							next(null, html.replace(replaceRegex, parsed));
 						});
 					} else {
-						next(null, html.replace(replaceRegex, embed.html));
+						if (embed.html) {
+							next(null, html.replace(replaceRegex, embed.html));
+						} else {
+							next(null, html);
+						}
 					}
 				}, next);
 			}
@@ -121,7 +125,7 @@ iframely.query = function(url, callback) {
 				winston.error('[plugin/iframely] Encountered error querying iFramely API: ' + err.message);
 				return callback();
 			} else {
-				if (body && body.html) {
+				if (res.statusCode === 200 && body) {
 					iframely.cache.set(url, body);
 					return callback(null, body);
 				} else {
