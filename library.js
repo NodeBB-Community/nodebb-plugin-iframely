@@ -33,7 +33,7 @@ iframely.init = function(params, callback) {
 	router.get('/api/admin/plugins/iframely', controllers.renderAdminPage);
 
 	meta.settings.get('iframely', function(err, config) {
-		config.blacklist = config.blacklist.split(',');
+		config.blacklist = (config.blacklist && config.blacklist.split(',')) || [];
 		iframely.config = config;
 	});
 
