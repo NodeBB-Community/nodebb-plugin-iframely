@@ -4,10 +4,12 @@ var controllers = require('./lib/controllers'),
 	meta = module.parent.require('./meta'),
 	request = module.parent.require('request'),
 	async = module.parent.require('async'),
+	nconf = module.parent.require('nconf'),
 	winston = module.parent.require('winston'),
 	templates = module.parent.require('templates.js'),
 	postCache = module.parent.require('./posts/cache'),
 	LRU = require('lru-cache'),
+	url = require('url'),
 
 	iframely = {
 		config: undefined,
@@ -16,7 +18,7 @@ var controllers = require('./lib/controllers'),
 		cache: LRU({
 			maxAge: 1000*60*60*24	// one day
 		}),
-		htmlRegex: /<a.+?href="(.+?)".*?>.*?<\/a>/g
+		htmlRegex: /<a.+?href="(.+?)".*?>(.*?)<\/a>/g
 	},
 	app;
 
@@ -31,6 +33,7 @@ iframely.init = function(params, callback) {
 	router.get('/api/admin/plugins/iframely', controllers.renderAdminPage);
 
 	meta.settings.get('iframely', function(err, config) {
+		config.blacklist = config.blacklist.split(',');
 		iframely.config = config;
 	});
 
@@ -41,6 +44,7 @@ iframely.updateConfig = function(data) {
 	if (data.plugin === 'iframely') {
 		winston.verbose('[plugin/iframely] Config updated');
 		postCache.reset();
+		data.settings.blacklist = data.settings.blacklist.split(',');
 		iframely.config = data.settings;
 	}
 };
@@ -71,12 +75,18 @@ iframely.replace = function(raw, callback) {
 
 		// Isolate matches
 		while(match = iframely.htmlRegex.exec(raw)) {
-			urls.push(match[1]);
+			// Only match if it is a naked link (no anchor text)
+			var target = url.parse(match[1]),
+				text = url.parse(match[2]);
+
+			if (match[1] === match[2] || target.host + target.path === match[2] && notInBlacklist(match[1])) {
+				urls.push(match[1]);
+			}
 		}
 
-		// Eliminate duplicates
+		// Eliminate duplicates and internal links
 		urls = urls.filter(function(url, idx) {
-			return urls.indexOf(url) === idx;
+			return urls.indexOf(url) === idx && url.indexOf(nconf.get('url')) !== 0;
 		});
 
 		async.waterfall([
@@ -135,5 +145,14 @@ iframely.query = function(url, callback) {
 		});
 	}
 };
+
+function notInBlacklist(urlToCheck) {
+	if (iframely.config.enableBlacklist === 'on') {
+		var parsed = url.parse(urlToCheck);
+		return iframely.config.blacklist.indexOf(parsed.host) === -1;
+	} else {
+		return true;
+	}
+}
 
 module.exports = iframely;
