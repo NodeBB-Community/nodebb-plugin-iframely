@@ -7,9 +7,11 @@ var controllers = require('./lib/controllers'),
 	nconf = module.parent.require('nconf'),
 	winston = module.parent.require('winston'),
 	templates = module.parent.require('templates.js'),
+
 	postCache = module.parent.require('./posts/cache'),
 	LRU = require('lru-cache'),
 	url = require('url'),
+	escapeHtml = require('escape-html'),
 
 	iframely = {
 		config: undefined,
@@ -98,6 +100,7 @@ iframely.replace = function(raw, callback) {
 				async.reduce(embeds.filter(Boolean), raw, function(html, embed, next) {
 					var replaceRegex = new RegExp('<a.+?href="' + embed.url.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&") + '".*?>.*?</a>', 'g');
 					if (iframely.config.simple !== 'on') {
+						embed.escaped_html = escapeHtml(embed.html);
 						app.render('partials/iframely-embed', embed, function(err, parsed) {
 							if (err) {
 								winston.error('[plugin/iframely] Could not parse embed! ' + err.message);
