@@ -213,12 +213,12 @@ function hostInBlacklist(host) {
 
 function alwaysExpandDomain(urlToCheck) {
 	var parsed = url.parse(urlToCheck);
-	return iframely.config.expandDomains.indexOf(parsed.host) > -1;
+	return iframely.config.expandDomains && iframely.config.expandDomains.indexOf(parsed.host) > -1;
 }
 
 function alwaysCollapseDomain(urlToCheck) {
 	var parsed = url.parse(urlToCheck);
-	return iframely.config.collapseDomains.indexOf(parsed.host) > -1;
+	return iframely.config.collapseDomains && iframely.config.collapseDomains.indexOf(parsed.host) > -1;
 }
 
 function getIntValue(value, defaultValue) {
