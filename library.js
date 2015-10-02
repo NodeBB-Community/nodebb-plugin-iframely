@@ -74,7 +74,7 @@ iframely.replace = function(raw, options, callback) {
 		 *	instead of a plain string, call self.
 		 */
 		iframely.replace(raw.postData.content, {
-			forceHideEmbed: parseInt(raw.postData.votes) < 0
+			votes: parseInt(raw.postData.votes)
 		}, function(err, html) {
 			raw.postData.content = html;
 			return callback(err, raw);
@@ -123,8 +123,19 @@ iframely.replace = function(raw, options, callback) {
 							collapseWidget = false;
 						}
 
-						if (options && options.forceHideEmbed) {
-							collapseWidget = true;
+						if (options && typeof options.votes === 'number') {
+
+							if (iframely.config.collapseOnVotes === 'on') {
+								if (options.votes <= getInt(iframely.config.collapseOnVotesCount, -1)) {
+									collapseWidget = true;
+								}
+							}
+
+							if (iframely.config.expandOnVotes === 'on') {
+								if (options.votes >= getInt(iframely.config.expandOnVotesCount, 1)) {
+									collapseWidget = false;
+								}
+							}
 						}
 
 						if (collapseWidget) {
@@ -196,6 +207,15 @@ function alwaysExpandDomain(urlToCheck) {
 function alwaysCollapseDomain(urlToCheck) {
 	var parsed = url.parse(urlToCheck);
 	return iframely.config.collapseDomains.indexOf(parsed.host) > -1;
+}
+
+function getIntValue(value, defaultValue) {
+	value = parseInt(value);
+	if (typeof value === 'number' && !isNaN(value)) {
+		return value;
+	} else {
+		return defaultValue;
+	}
 }
 
 module.exports = iframely;
