@@ -106,38 +106,47 @@ iframely.replace = function(raw, options, callback) {
 			// Replace post text as necessary
 			function(embeds, next) {
 				async.reduce(embeds.filter(Boolean), raw, function(html, embed, next) {
-					var replaceRegex = new RegExp('<a.+?href="' + embed.url.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&") + '".*?>.*?</a>', 'g');
-					if (iframely.config.simple !== 'on') {
+					app.render('partials/embed-widget', embed, function(err, embed_widget) {
 
-						app.render('partials/embed-widget', embed, function(err, embed_widget) {
+						if (err) {
+							winston.error('[plugin/iframely] Could not parse embed! ' + err.message);
+							return next(null, html);
+						}
 
-							if (options && options.forceHideEmbed) {
-								embed.escaped_html = escapeHtml(embed.html);
-								embed.toggle_label = 'SHOW';
-								embed.widget_html = embed_widget;
-							} else {
-								embed.escaped_html = escapeHtml(embed_widget);
-								embed.toggle_label = 'HIDE';
-								embed.widget_html = embed.html;
+						var replaceRegex = new RegExp('<a.+?href="' + embed.url.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&") + '".*?>.*?</a>', 'g');
+
+						var collapseWidget = iframely.config.mode === 'alwaysCollapse';
+
+						if (alwaysCollapseDomain(embed.url)) {
+							collapseWidget = true;
+						} else if (alwaysExpandDomain(embed.url)) {
+							collapseWidget = false;
+						}
+
+						if (options && options.forceHideEmbed) {
+							collapseWidget = true;
+						}
+
+						if (collapseWidget) {
+							embed.escaped_html = escapeHtml(embed.html);
+							embed.toggle_label = 'SHOW';
+							embed.widget_html = embed_widget;
+						} else {
+							embed.escaped_html = escapeHtml(embed_widget);
+							embed.toggle_label = 'HIDE';
+							embed.widget_html = embed.html;
+						}
+
+						app.render('partials/iframely-embed', embed, function(err, parsed) {
+							if (err) {
+								winston.error('[plugin/iframely] Could not parse embed! ' + err.message);
+								return next(null, html);
 							}
 
-							app.render('partials/iframely-embed', embed, function(err, parsed) {
-								if (err) {
-									winston.error('[plugin/iframely] Could not parse embed! ' + err.message);
-									return next(null, html);
-								}
-
-								next(null, html.replace(replaceRegex, parsed));
-							});
+							next(null, html.replace(replaceRegex, parsed));
 						});
+					});
 
-					} else {
-						if (embed.html) {
-							next(null, html.replace(replaceRegex, embed.html));
-						} else {
-							next(null, html);
-						}
-					}
 				}, next);
 			}
 		], callback);
@@ -178,6 +187,16 @@ function notInBlacklist(urlToCheck) {
 	} else {
 		return true;
 	}
+}
+
+function alwaysExpandDomain(urlToCheck) {
+	var parsed = url.parse(urlToCheck);
+	return iframely.config.expandDomains.indexOf(parsed.host) > -1;
+}
+
+function alwaysCollapseDomain(urlToCheck) {
+	var parsed = url.parse(urlToCheck);
+	return iframely.config.collapseDomains.indexOf(parsed.host) > -1;
 }
 
 module.exports = iframely;
