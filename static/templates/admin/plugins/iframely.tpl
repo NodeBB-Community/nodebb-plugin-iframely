@@ -22,10 +22,9 @@
 		<div class="col-sm-2 col-xs-12 settings-header">Widgets Settings</div>
 		<div class="col-sm-10 col-xs-12">
 			<div class="form-group">
-				<label>When Show Expanded Widget?</label>
 				<select class="form-control" name="mode">
 					<option value="alwaysExpand">Always Show Expanded Widget</option>
-					<option value="alwaysCollapse">Collapse Widget And Show Preview With 'Expand' Button</option>
+					<option value="alwaysCollapse">Always Collapse Widget And Show Preview With 'Expand' Button</option>
 				</select>
 			</div>
 			<div class="form-group">
