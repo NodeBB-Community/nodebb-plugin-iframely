@@ -9,7 +9,7 @@
 	<a href="{url}">{domain}</a>
 	<a href="{url}" class="toggle-embed" data-iframely-embed="{escaped_html}">{toggle_label}</a>
 	<!-- IF !widget_html -->
-	<div style="display: none;"></div>
+	<div class="iframely-container" style="display: none;"></div>
 	<!-- ENDIF !widget_html -->
 	<!-- IF widget_html -->
 	<div class="iframely-container">
