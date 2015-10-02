@@ -126,26 +126,26 @@ iframely.replace = function(raw, options, callback) {
 						if (options && typeof options.votes === 'number') {
 
 							if (iframely.config.collapseOnVotes === 'on') {
-								if (options.votes <= getInt(iframely.config.collapseOnVotesCount, -1)) {
+								if (options.votes <= getIntValue(iframely.config.collapseOnVotesCount, -1)) {
 									collapseWidget = true;
 								}
 							}
 
 							if (iframely.config.expandOnVotes === 'on') {
-								if (options.votes >= getInt(iframely.config.expandOnVotesCount, 1)) {
+								if (options.votes >= getIntValue(iframely.config.expandOnVotesCount, 1)) {
 									collapseWidget = false;
 								}
 							}
 						}
 
 						if (collapseWidget) {
-							embed.escaped_html = escapeHtml(embed.html);
-							embed.toggle_label = 'SHOW';
-							embed.widget_html = embed_widget;
-						} else {
 							embed.escaped_html = escapeHtml(embed_widget);
+							embed.toggle_label = 'SHOW';
+							embed.widget_html = '';
+						} else {
+							embed.escaped_html = '';
 							embed.toggle_label = 'HIDE';
-							embed.widget_html = embed.html;
+							embed.widget_html = embed_widget;
 						}
 
 						app.render('partials/iframely-embed', embed, function(err, parsed) {

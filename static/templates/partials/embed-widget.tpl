@@ -14,18 +14,15 @@
             <!-- ENDIF links.thumbnail.length -->
             <div class="media-body">
                 <h4 class="media-heading">
-                    <!-- IF links.icon.length -->
-                    <!-- BEGIN links.icon -->
-                    <!-- IF @first -->
-                    <img src="{../href}" class="thumb pull-right" />
-                    <!-- ENDIF @first -->
-                    <!-- END links.icon -->
-                    <!-- ENDIF links.icon.length -->
                     <a href="{url}" target="_blank">{meta.title}</a>
                 </h4>
                 <span class="text-muted">{meta.author}</span>
                 <p class="description">{meta.description}</p>
             </div>
+
+            <div class="media">
+                {html}
+            </divclass>
         </div>
     </div>
 </div>
