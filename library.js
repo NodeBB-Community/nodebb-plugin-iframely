@@ -61,13 +61,21 @@ iframely.addAdminNavigation = function(header, callback) {
 	callback(null, header);
 };
 
-iframely.replace = function(raw, callback) {
-	if (typeof raw !== 'string' && raw.hasOwnProperty('postData') && raw.postData.hasOwnProperty('content')) {
+iframely.replace = function(raw, options, callback) {
+
+	if (typeof options === 'function') {
+		callback = options;
+	}
+
+	if (raw && typeof raw !== 'string' && raw.hasOwnProperty('postData') && raw.postData.hasOwnProperty('content')) {
+
 		/**
 		 *	If a post object is received (`filter:post.parse`),
 		 *	instead of a plain string, call self.
 		 */
-		iframely.replace(raw.postData.content, function(err, html) {
+		iframely.replace(raw.postData.content, {
+			forceHideEmbed: parseInt(raw.postData.votes) < 0
+		}, function(err, html) {
 			raw.postData.content = html;
 			return callback(err, raw);
 		});
@@ -100,15 +108,29 @@ iframely.replace = function(raw, callback) {
 				async.reduce(embeds.filter(Boolean), raw, function(html, embed, next) {
 					var replaceRegex = new RegExp('<a.+?href="' + embed.url.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&") + '".*?>.*?</a>', 'g');
 					if (iframely.config.simple !== 'on') {
-						embed.escaped_html = escapeHtml(embed.html);
-						app.render('partials/iframely-embed', embed, function(err, parsed) {
-							if (err) {
-								winston.error('[plugin/iframely] Could not parse embed! ' + err.message);
-								return next(null, html);
+
+						app.render('partials/embed-widget', embed, function(err, embed_widget) {
+
+							if (options && options.forceHideEmbed) {
+								embed.escaped_html = escapeHtml(embed.html);
+								embed.toggle_label = 'SHOW';
+								embed.widget_html = embed_widget;
+							} else {
+								embed.escaped_html = escapeHtml(embed_widget);
+								embed.toggle_label = 'HIDE';
+								embed.widget_html = embed.html;
 							}
 
-							next(null, html.replace(replaceRegex, parsed));
+							app.render('partials/iframely-embed', embed, function(err, parsed) {
+								if (err) {
+									winston.error('[plugin/iframely] Could not parse embed! ' + err.message);
+									return next(null, html);
+								}
+
+								next(null, html.replace(replaceRegex, parsed));
+							});
 						});
+
 					} else {
 						if (embed.html) {
 							next(null, html.replace(replaceRegex, embed.html));

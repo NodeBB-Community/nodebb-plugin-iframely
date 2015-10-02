@@ -26,7 +26,7 @@
 		<div class="col-sm-10 col-xs-12">
 			<div class="form-group">
 				<label for="blacklist">Blacklisted Domains</label>
-				<input type="text" id="blacklist" name="blacklist" title="Blacklisted Domains" class="form-control" placeholder="Blacklisted Domains" />
+				<input type="text" id="blacklist" name="blacklist" title="Blacklisted Domains" class="form-control" placeholder="domain1.com, domain2.com" />
 			</div>
 			<div class="checkbox">
 				<label for="enableBlacklist" class="mdl-switch mdl-js-switch mdl-js-ripple-effect">
