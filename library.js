@@ -86,10 +86,11 @@ iframely.replace = function(raw, options, callback) {
 		// Isolate matches
 		while(match = iframely.htmlRegex.exec(raw)) {
 			// Only match if it is a naked link (no anchor text)
+
 			var target = url.parse(match[1]),
 				text = url.parse(match[2]);
 
-			if ((match[1] === match[2] || (target.host + target.path === match[2])) && !hostInBlacklist(target.host)) {
+			if (((match[1] === match[2]) || (target.host + target.path === match[2])) && !hostInBlacklist(target.host)) {
 				urls.push(match[1]);
 			}
 		}
@@ -207,7 +208,7 @@ function hostInBlacklist(host) {
 	if (iframely.config.enableBlacklist === 'on') {
 		return iframely.config.blacklist.indexOf(host) > -1;
 	} else {
-		return true;
+		return false;
 	}
 }
 
