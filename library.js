@@ -89,7 +89,7 @@ iframely.replace = function(raw, options, callback) {
 			var target = url.parse(match[1]),
 				text = url.parse(match[2]);
 
-			if (match[1] === match[2] || target.host + target.path === match[2] && notInBlacklist(match[1])) {
+			if ((match[1] === match[2] || (target.host + target.path === match[2])) && !hostInBlacklist(target.host)) {
 				urls.push(match[1]);
 			}
 		}
@@ -180,10 +180,9 @@ iframely.query = function(url, callback) {
 	}
 };
 
-function notInBlacklist(urlToCheck) {
+function hostInBlacklist(host) {
 	if (iframely.config.enableBlacklist === 'on') {
-		var parsed = url.parse(urlToCheck);
-		return iframely.config.blacklist.indexOf(parsed.host) === -1;
+		return iframely.config.blacklist.indexOf(host) > -1;
 	} else {
 		return true;
 	}
