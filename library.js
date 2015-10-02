@@ -138,13 +138,25 @@ iframely.replace = function(raw, options, callback) {
 							}
 						}
 
+						var domain = embed.meta && embed.meta.site;
+						if (!domain) {
+							var url = embed.meta && embed.meta.canonical || embed.url;
+							var m = url.match(/(?:https?:\/\/)?(?:www\.)?([^\/]+)/i);
+							if (m) {
+								domain = m[1];
+							} else {
+								domain = url;
+							}
+						}
+						embed.domain = domain;
+
 						if (collapseWidget) {
 							embed.escaped_html = escapeHtml(embed_widget);
-							embed.toggle_label = 'SHOW';
+							embed.toggle_label = 'show details';
 							embed.widget_html = '';
 						} else {
 							embed.escaped_html = '';
-							embed.toggle_label = 'HIDE';
+							embed.toggle_label = 'hide';
 							embed.widget_html = embed_widget;
 						}
 

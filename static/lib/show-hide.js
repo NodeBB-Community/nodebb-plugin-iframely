@@ -6,18 +6,16 @@
         $('body').on('click', '[data-iframely-embed]', function(e) {
             e.preventDefault();
             var $this = $(this);
-            var text = $this.text();
-            var $container = $this.parent().find('>div');
+            var $container = $this.parent().find('.iframely-container');
 
             if ($container.is(':visible')) {
-                text = text.replace('[HIDE]', '[SHOW]');
-                $this.text(text);
+                $this.text('show details');
+                $this.attr('data-iframely-embed', $container.html());
                 $container.slideUp(200, function() {
                     $container.html('');
                 });
             } else {
-                text = text.replace('[SHOW]', '[HIDE]');
-                $this.text(text);
+                $this.text('hide');
                 var html = $this.attr('data-iframely-embed');
                 $container.html(html).slideDown(200);
             }
