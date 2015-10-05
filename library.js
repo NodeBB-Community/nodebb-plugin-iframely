@@ -107,49 +107,53 @@ iframely.replace = function(raw, options, callback) {
 			// Replace post text as necessary
 			function(embeds, next) {
 				async.reduce(embeds.filter(Boolean), raw, function(html, embed, next) {
+
+					var replaceRegex = new RegExp('<a.+?href="' + embed.url.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&") + '".*?>.*?</a>', 'g');
+
+					var collapseWidget = iframely.config.mode === 'alwaysCollapse';
+
+					if (alwaysCollapseDomain(embed.url)) {
+						collapseWidget = true;
+					} else if (alwaysExpandDomain(embed.url)) {
+						collapseWidget = false;
+					}
+
+					if (options && typeof options.votes === 'number') {
+
+						if (iframely.config.collapseOnVotes === 'on') {
+							if (options.votes <= getIntValue(iframely.config.collapseOnVotesCount, -1)) {
+								collapseWidget = true;
+							}
+						}
+
+						if (iframely.config.expandOnVotes === 'on') {
+							if (options.votes >= getIntValue(iframely.config.expandOnVotesCount, 1)) {
+								collapseWidget = false;
+							}
+						}
+					}
+
+					var domain = embed.meta && embed.meta.site;
+					if (!domain) {
+						var url = embed.meta && embed.meta.canonical || embed.url;
+						var m = url.match(/(?:https?:\/\/)?(?:www\.)?([^\/]+)/i);
+						if (m) {
+							domain = m[1];
+						} else {
+							domain = url;
+						}
+					}
+					embed.domain = domain;
+
+					embed.description = shortenText(embed.meta.description, 300);
+					embed.date = getDate(embed.meta.date);
+
 					app.render('partials/embed-widget', embed, function(err, embed_widget) {
 
 						if (err) {
 							winston.error('[plugin/iframely] Could not parse embed! ' + err.message);
 							return next(null, html);
 						}
-
-						var replaceRegex = new RegExp('<a.+?href="' + embed.url.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&") + '".*?>.*?</a>', 'g');
-
-						var collapseWidget = iframely.config.mode === 'alwaysCollapse';
-
-						if (alwaysCollapseDomain(embed.url)) {
-							collapseWidget = true;
-						} else if (alwaysExpandDomain(embed.url)) {
-							collapseWidget = false;
-						}
-
-						if (options && typeof options.votes === 'number') {
-
-							if (iframely.config.collapseOnVotes === 'on') {
-								if (options.votes <= getIntValue(iframely.config.collapseOnVotesCount, -1)) {
-									collapseWidget = true;
-								}
-							}
-
-							if (iframely.config.expandOnVotes === 'on') {
-								if (options.votes >= getIntValue(iframely.config.expandOnVotesCount, 1)) {
-									collapseWidget = false;
-								}
-							}
-						}
-
-						var domain = embed.meta && embed.meta.site;
-						if (!domain) {
-							var url = embed.meta && embed.meta.canonical || embed.url;
-							var m = url.match(/(?:https?:\/\/)?(?:www\.)?([^\/]+)/i);
-							if (m) {
-								domain = m[1];
-							} else {
-								domain = url;
-							}
-						}
-						embed.domain = domain;
 
 						if (collapseWidget) {
 							embed.escaped_html = escapeHtml(embed_widget);
@@ -229,6 +233,64 @@ function getIntValue(value, defaultValue) {
 	} else {
 		return defaultValue;
 	}
+}
+
+function shortenText(value, maxlength) {
+
+	if (!value) {
+		return '';
+	}
+
+	maxlength = maxlength || 130;
+
+	value = '' + value;
+
+	if (value.length <= maxlength) {
+		return value;
+	} else {
+
+		value = value.substr(0, maxlength);
+
+		var m = value.match(/(.*)[\. ,\/-]/);
+
+		if (m) {
+			value = m[1]
+			return m[1] + '...';
+		}
+
+		return value + '...';
+	}
+}
+
+function getDate(date) {
+
+	var months = [
+		"Jan",
+		"Feb",
+		"March",
+		"April",
+		"May",
+		"June",
+		"July",
+		"Aug",
+		"Sept",
+		"Oct",
+		"Nov",
+		"Dec"
+	];
+
+	var onDate = '';
+	if (date) {
+		date = new Date(date);
+		if (date && !isNaN(date.getTime())) {
+			onDate = months[date.getMonth()] + ' ' + date.getDate();
+			if (date.getFullYear() !== new Date().getFullYear()) {
+				onDate = onDate + ', ' + date.getFullYear();
+			}
+		}
+	}
+
+	return onDate;
 }
 
 module.exports = iframely;
