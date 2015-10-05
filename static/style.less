@@ -1,35 +1,44 @@
 .iframely-link {
 
-  .thumb {
-	max-width: 21px !important;
-	margin-right: 5px;
-  }
-
-  .toggle-embed {
-	margin-left: 50px;
-  }
-
-  .iframely-container {
-
-	margin-top: 15px;
-
-	.panel-iframely {
-
-	  max-width: 600px;
-
-	  .iframely-embed {
-
-		  .iframely-meta {
-			  margin-bottom: 10px;
-		  }
-
-		  .media iframe {
-			  max-width: 100%;
-		  }
-	  }
+	.thumb {
+		max-width: 21px !important;
+		margin-right: 5px;
 	}
 
-  }
+	.toggle-embed {
+		margin-left: 50px;
+	}
 
+	.iframely-container {
+
+		margin-top: 15px;
+
+		.panel-iframely {
+
+			max-width: 600px;
+
+			.iframely-embed {
+
+				.title {
+					text-overflow: ellipsis;
+					white-space: nowrap;
+					overflow: hidden;
+					display: inline-block;
+					width: 100%;
+				}
+
+				.iframely-meta {
+					margin-bottom: 10px;
+				}
+
+				.media iframe {
+					max-width: 100%;
+				}
+
+				p.description {
+					margin: 10px 0 0 0;
+				}
+			}
+		}
+	}
 }
-

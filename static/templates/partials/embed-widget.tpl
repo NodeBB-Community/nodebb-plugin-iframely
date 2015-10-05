@@ -13,7 +13,7 @@
             </div>
 
             <h4 class="media-heading">
-                <a href="{url}" target="_blank" rel="nofollow">{meta.title}</a>
+                <a href="{url}" target="_blank" rel="nofollow" class="title">{meta.title}</a>
             </h4>
 
             <div class="media">
@@ -21,12 +21,14 @@
             </div>
 
             <!-- IF description -->
-            <p>
+            <p class="description">
                 {description}
             </p>
             <!-- ENDIF description -->
 
-            <a href="{url}" target="_blank" rel="nofollow">read on {domain}</a>
+            <p class="description">
+                <a href="{url}" target="_blank" rel="nofollow">read on {domain}</a>
+            </p>
 
         </div>
     </div>
