@@ -1,6 +1,6 @@
 <div class="iframely-link">
 
-	<a href="{url}" target="_blank">
+	<a href="{url}" target="_blank" rel="nofollow">
 
 		<!-- IF links.icon.length -->
 		<!-- BEGIN links.icon -->
@@ -13,7 +13,7 @@
 		{domain}
 	</a>
 
-	<a href="{url}" class="toggle-embed" data-iframely-embed="{escaped_html}">{toggle_label}</a>
+	<a href="{url}" class="toggle-embed" data-iframely-embed="{escaped_html}" rel="nofollow">{toggle_label}</a>
 	<!-- IF !widget_html -->
 	<div class="iframely-container" style="display: none;"></div>
 	<!-- ENDIF !widget_html -->

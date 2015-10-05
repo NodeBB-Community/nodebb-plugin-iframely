@@ -13,7 +13,7 @@
             </div>
 
             <h4 class="media-heading">
-                <a href="{url}" target="_blank">{meta.title}</a>
+                <a href="{url}" target="_blank" rel="nofollow">{meta.title}</a>
             </h4>
 
             <div class="media">
@@ -26,7 +26,7 @@
             </p>
             <!-- ENDIF description -->
 
-            <a href="{url}" target="_blank">read on {domain}</a>
+            <a href="{url}" target="_blank" rel="nofollow">read on {domain}</a>
 
         </div>
     </div>
