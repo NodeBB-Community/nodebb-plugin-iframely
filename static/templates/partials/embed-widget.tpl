@@ -26,9 +26,11 @@
             </p>
             <!-- ENDIF description -->
 
+            <!-- IF more_label -->
             <p class="description">
-                <a href="{embed.url}" target="_blank" rel="nofollow">read on {domain}</a>
+                <a href="{embed.url}" target="_blank" rel="nofollow">{more_label} {domain}</a>
             </p>
+            <!-- ENDIF more_label -->
 
         </div>
     </div>

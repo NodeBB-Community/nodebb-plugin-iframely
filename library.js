@@ -137,22 +137,38 @@ iframely.replace = function(raw, options, callback) {
 
 					// End detect collapsed.
 
-					var domain = embed.meta && embed.meta.site;
-					if (!domain) {
-						var url = embed.meta && embed.meta.canonical || embed.url;
-						var m = url.match(/(?:https?:\/\/)?(?:www\.)?([^\/]+)/i);
-						if (m) {
-							domain = m[1];
-						} else {
-							domain = url;
-						}
-					}
-
 					var context = {};
 
-					context.domain = domain;
+					context.domain = getDomain(embed);
 					context.description = shortenText(embed.meta.description, 300);
 					context.date = getDate(embed.meta.date);
+
+					if (embed.rel.indexOf('player') > -1) {
+						context.show_label = 'show player';
+						context.hide_label = 'hide player';
+						context.more_label = 'play on';
+
+					} else if (embed.rel.indexOf('image') > -1) {
+						context.show_label = 'show image';
+						context.hide_label = 'hide image';
+						context.more_label = 'view on';
+
+					} else if (embed.rel.indexOf('file') > -1) {
+						context.show_label = 'show file';
+						context.hide_label = 'hide file';
+
+					} else {
+						context.show_label = 'show details';
+						context.hide_label = 'hide details';
+
+						if (embed.meta.media == 'reader') {
+							// TODO: check usage.
+							context.more_label = 'real on';
+						} else if (!embed.html) {
+							// TODO: check usage.
+							context.more_label = 'visit';
+						}
+					}
 
 					context.embed = embed;
 
@@ -162,24 +178,6 @@ iframely.replace = function(raw, options, callback) {
 							winston.error('[plugin/iframely] Could not parse embed! ' + err.message);
 							return next(null, html);
 						}
-
-						if (embed.rel.indexOf('player') > -1) {
-							context.show_label = 'show player';
-							context.hide_label = 'hide player';
-
-						} else if (embed.rel.indexOf('image') > -1) {
-							context.show_label = 'show image';
-							context.hide_label = 'hide image';
-
-						} else if (embed.rel.indexOf('file') > -1) {
-							context.show_label = 'show file';
-							context.hide_label = 'hide file';
-
-						} else {
-							context.show_label = 'show details';
-							context.hide_label = 'hide details';
-						}
-
 
 						if (collapseWidget) {
 							context.escaped_html = escapeHtml(embed_widget);
@@ -286,6 +284,20 @@ function shortenText(value, maxlength) {
 
 		return value + '...';
 	}
+}
+
+function getDomain(embed) {
+	var domain = embed.meta && embed.meta.site;
+	if (!domain) {
+		var url = embed.meta && embed.meta.canonical || embed.url;
+		var m = url.match(/(?:https?:\/\/)?(?:www\.)?([^\/]+)/i);
+		if (m) {
+			domain = m[1];
+		} else {
+			domain = url;
+		}
+	}
+	return domain;
 }
 
 function getDate(date) {
