@@ -170,6 +170,12 @@ iframely.replace = function(raw, options, callback) {
 						}
 					}
 
+					var currency = embed.meta.currency_code || embed.meta.currency;
+					context.price = embed.meta.price ? (embed.meta.price + (currency ? (' ' + currency) : '')) : null;
+					context.duration = getDuration(embed.meta.duration);
+					context.views = getViews(embed.meta.views);
+					context.category = embed.meta.category;
+
 					context.embed = embed;
 
 					app.render('partials/embed-widget', context, function(err, embed_widget) {
@@ -283,6 +289,32 @@ function shortenText(value, maxlength) {
 		}
 
 		return value + '...';
+	}
+}
+
+function getDuration(duration) {
+	if (duration) {
+		var seconds = duration % 60;
+		var minutes = Math.floor((duration - seconds) / 60);
+		var hours = Math.floor(minutes / 60);
+		minutes = minutes % 60;
+
+		if (minutes < 10) {
+			minutes = '0' + minutes;
+		}
+
+		return (hours ? (hours + ':') : '') + minutes + ':' + seconds;
+	}
+}
+
+function getViews(views) {
+	if (views) {
+		if (views > 1000) {
+			// TODO: decimal separator.
+			return Math.round(views / 1000) + 'K';
+		} else {
+			return views;
+		}
 	}
 }
 
