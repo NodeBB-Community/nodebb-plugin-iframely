@@ -161,7 +161,7 @@ iframely.replace = function(raw, options, callback) {
 							embed.widget_html = '';
 						} else {
 							embed.escaped_html = '';
-							embed.toggle_label = 'hide';
+							embed.toggle_label = 'hide details';
 							embed.widget_html = embed_widget;
 						}
 

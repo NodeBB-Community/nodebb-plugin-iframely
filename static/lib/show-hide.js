@@ -6,7 +6,7 @@
         $('body').on('click', '[data-iframely-embed]', function(e) {
             e.preventDefault();
             var $this = $(this);
-            var $container = $this.parent().find('.iframely-container');
+            var $container = $this.parent().parent().find('.iframely-container');
 
             if ($container.is(':visible')) {
                 $this.text('show details');
@@ -14,8 +14,10 @@
                 $container.slideUp(200, function() {
                     $container.html('');
                 });
+                //$container.hide();
+                //$container.html('');
             } else {
-                $this.text('hide');
+                $this.text('hide details');
                 var html = $this.attr('data-iframely-embed');
                 $container.html(html).slideDown(200);
             }
