@@ -163,7 +163,7 @@ iframely.replace = function(raw, options, callback) {
 
 						if (embed.meta.media == 'reader') {
 							// TODO: check usage.
-							context.more_label = 'real on';
+							context.more_label = 'read on';
 						} else if (!embed.html) {
 							// TODO: check usage.
 							context.more_label = 'visit';
