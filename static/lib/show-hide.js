@@ -9,15 +9,13 @@
             var $container = $this.parent().parent().find('.iframely-container');
 
             if ($container.is(':visible')) {
-                $this.text('show details');
+                $this.text($this.attr('data-show-label'));
                 $this.attr('data-iframely-embed', $container.html());
                 $container.slideUp(200, function() {
                     $container.html('');
                 });
-                //$container.hide();
-                //$container.html('');
             } else {
-                $this.text('hide details');
+                $this.text($this.attr('data-hide-label'));
                 var html = $this.attr('data-iframely-embed');
                 $container.html(html).slideDown(200);
             }

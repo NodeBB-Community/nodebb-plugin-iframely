@@ -1,20 +1,20 @@
 <div class="iframely-link">
 
 	<div>
-		<a href="{url}" target="_blank" rel="nofollow">
+		<a href="{embed.url}" target="_blank" rel="nofollow">
 
-			<!-- IF links.icon.length -->
-			<!-- BEGIN links.icon -->
+			<!-- IF embed.links.icon.length -->
+			<!-- BEGIN embed.links.icon -->
 			<!-- IF @first -->
 			<img src="{../href}" class="thumb pull-left" />
 			<!-- ENDIF @first -->
-			<!-- END links.icon -->
-			<!-- ENDIF links.icon.length -->
+			<!-- END embed.links.icon -->
+			<!-- ENDIF embed.links.icon.length -->
 
 			{domain}
 		</a>
 
-		<a href="{url}" class="toggle-embed" data-iframely-embed="{escaped_html}" rel="nofollow">{toggle_label}</a>
+		<a href="{embed.url}" class="toggle-embed" data-iframely-embed="{escaped_html}" data-show-label="{show_label}" data-hide-label="{hide_label}" rel="nofollow">{toggle_label}</a>
 	</div>
 
 	<!-- IF !widget_html -->

@@ -110,6 +110,8 @@ iframely.replace = function(raw, options, callback) {
 
 					var replaceRegex = new RegExp('<a.+?href="' + embed.url.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&") + '".*?>.*?</a>', 'g');
 
+					// Start detect collapsed.
+
 					var collapseWidget = iframely.config.mode === 'alwaysCollapse';
 
 					if (alwaysCollapseDomain(embed.url)) {
@@ -133,6 +135,8 @@ iframely.replace = function(raw, options, callback) {
 						}
 					}
 
+					// End detect collapsed.
+
 					var domain = embed.meta && embed.meta.site;
 					if (!domain) {
 						var url = embed.meta && embed.meta.canonical || embed.url;
@@ -143,29 +147,51 @@ iframely.replace = function(raw, options, callback) {
 							domain = url;
 						}
 					}
-					embed.domain = domain;
 
-					embed.description = shortenText(embed.meta.description, 300);
-					embed.date = getDate(embed.meta.date);
+					var context = {};
 
-					app.render('partials/embed-widget', embed, function(err, embed_widget) {
+					context.domain = domain;
+					context.description = shortenText(embed.meta.description, 300);
+					context.date = getDate(embed.meta.date);
+
+					context.embed = embed;
+
+					app.render('partials/embed-widget', context, function(err, embed_widget) {
 
 						if (err) {
 							winston.error('[plugin/iframely] Could not parse embed! ' + err.message);
 							return next(null, html);
 						}
 
-						if (collapseWidget) {
-							embed.escaped_html = escapeHtml(embed_widget);
-							embed.toggle_label = 'show details';
-							embed.widget_html = '';
+						if (embed.rel.indexOf('player') > -1) {
+							context.show_label = 'show player';
+							context.hide_label = 'hide player';
+
+						} else if (embed.rel.indexOf('image') > -1) {
+							context.show_label = 'show image';
+							context.hide_label = 'hide image';
+
+						} else if (embed.rel.indexOf('file') > -1) {
+							context.show_label = 'show file';
+							context.hide_label = 'hide file';
+
 						} else {
-							embed.escaped_html = '';
-							embed.toggle_label = 'hide details';
-							embed.widget_html = embed_widget;
+							context.show_label = 'show details';
+							context.hide_label = 'hide details';
 						}
 
-						app.render('partials/iframely-embed', embed, function(err, parsed) {
+
+						if (collapseWidget) {
+							context.escaped_html = escapeHtml(embed_widget);
+							context.toggle_label = context.show_label;
+							context.widget_html = '';
+						} else {
+							context.escaped_html = '';
+							context.toggle_label = context.hide_label;
+							context.widget_html = embed_widget;
+						}
+
+						app.render('partials/iframely-embed', context, function(err, parsed) {
 							if (err) {
 								winston.error('[plugin/iframely] Could not parse embed! ' + err.message);
 								return next(null, html);

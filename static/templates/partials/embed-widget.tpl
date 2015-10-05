@@ -3,7 +3,7 @@
         <div class="media iframely-embed">
 
             <div class="text-muted iframely-meta">
-                {meta.author}
+                {embed.meta.author}
 
                 <!-- IF date -->
                 &nbsp;&nbsp;/&nbsp;&nbsp;
@@ -13,11 +13,11 @@
             </div>
 
             <h4 class="media-heading">
-                <a href="{url}" target="_blank" rel="nofollow" class="title">{meta.title}</a>
+                <a href="{embed.url}" target="_blank" rel="nofollow" class="title">{embed.meta.title}</a>
             </h4>
 
             <div class="media">
-                {html}
+                {embed.html}
             </div>
 
             <!-- IF description -->
@@ -27,7 +27,7 @@
             <!-- ENDIF description -->
 
             <p class="description">
-                <a href="{url}" target="_blank" rel="nofollow">read on {domain}</a>
+                <a href="{embed.url}" target="_blank" rel="nofollow">read on {domain}</a>
             </p>
 
         </div>
