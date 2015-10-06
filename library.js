@@ -207,7 +207,7 @@ iframely.replace = function(raw, options, callback) {
 
 					context.embed = embed;
 
-					app.render('partials/embed-widget', context, function(err, embed_widget) {
+					function renderWidgetWrapper(err, embed_widget) {
 
 						if (err) {
 							winston.error('[plugin/iframely] Could not parse embed! ' + err.message);
@@ -232,7 +232,13 @@ iframely.replace = function(raw, options, callback) {
 
 							next(null, html.replace(replaceRegex, parsed));
 						});
-					});
+					}
+
+					if (embed.rel.indexOf('app') > -1) {
+						renderWidgetWrapper(null, embed.html);
+					} else {
+						app.render('partials/embed-widget', context, renderWidgetWrapper);
+					}
 
 				}, next);
 			}

@@ -5,7 +5,10 @@
     $(document).ready(function() {
         $('body').on('click', '[data-iframely-embed]', function(e) {
             e.preventDefault();
+
             var $this = $(this);
+            $this.blur();
+            
             var $container = $this.parent().parent().find('.iframely-container');
 
             if ($container.is(':visible')) {

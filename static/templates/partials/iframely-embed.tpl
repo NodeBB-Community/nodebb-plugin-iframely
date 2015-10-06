@@ -14,7 +14,7 @@
 			{domain}
 		</a>
 
-		<a href="{embed.url}" class="toggle-embed" data-iframely-embed="{escaped_html}" data-show-label="{show_label}" data-hide-label="{hide_label}" rel="nofollow">{toggle_label}</a>
+		<a href="{embed.url}" class="toggle-embed no-select" data-iframely-embed="{escaped_html}" data-show-label="{show_label}" data-hide-label="{hide_label}" rel="nofollow">{toggle_label}</a>
 	</div>
 
 	<!-- IF !widget_html -->
