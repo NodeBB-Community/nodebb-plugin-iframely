@@ -8,7 +8,7 @@
 
             var $this = $(this);
             $this.blur();
-            
+
             var $container = $this.parent().parent().find('.iframely-container');
 
             if ($container.is(':visible')) {

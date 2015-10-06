@@ -108,6 +108,11 @@ iframely.replace = function(raw, options, callback) {
 			function(embeds, next) {
 				async.reduce(embeds.filter(Boolean), raw, function(html, embed, next) {
 
+					if (embed.rel.indexOf('summary') > -1 && embed.rel.indexOf('app') === -1) {
+						// Skip summary cards.
+						return next(null, html);
+					}
+
 					var replaceRegex = new RegExp('<a.+?href="' + embed.url.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&") + '".*?>.*?</a>', 'g');
 
 					// Start detect collapsed.
