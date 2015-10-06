@@ -133,13 +133,13 @@ iframely.replace = function(raw, options, callback) {
 					var votes = typeof options.votes === 'number' ? options.votes : 0;
 
 					if (options) {
-						if (options.votes >= getIntValue(iframely.config.collapseOnVotesCount, 0)) {
+						if (votes >= getIntValue(iframely.config.expandOnVotesCount, 0)) {
 							collapseWidget = false;
 						}
 					}
 
 					// Expand small image.
-					if (embed.rel.indexOf('file') > -1 && embed.rel.indexOf('image') > -1) {
+					if (votes===0 && embed.rel.indexOf('file') > -1 && embed.rel.indexOf('image') > -1) {
 						var size = embed.links.file && embed.links.file[0].content_length;
 						if (size < 200 * 1024) {
 							collapseWidget = false;
@@ -150,22 +150,6 @@ iframely.replace = function(raw, options, callback) {
 						collapseWidget = true;
 					} else if (alwaysExpandDomain(embed.url)) {
 						collapseWidget = false;
-					}
-
-
-					if (options && typeof options.votes === 'number') {
-
-						if (iframely.config.collapseOnVotes === 'on') {
-							if (options.votes <= getIntValue(iframely.config.collapseOnVotesCount, -1)) {
-								collapseWidget = true;
-							}
-						}
-
-						if (iframely.config.expandOnVotes === 'on') {
-							if (options.votes >= getIntValue(iframely.config.expandOnVotesCount, 1)) {
-								collapseWidget = false;
-							}
-						}
 					}
 
 					// End detect collapsed.
