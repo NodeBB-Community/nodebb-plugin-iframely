@@ -160,22 +160,26 @@ iframely.replace = function(raw, options, callback) {
 					context.domain = getDomain(embed);
 					context.description = shortenText(embed.meta.description, 300);
 
-					if (embed.rel.indexOf('player') > -1) {
-						context.show_label = 'show player';
-						context.hide_label = 'hide player';
-						context.more_label = 'play on';
+					if (embed.rel.indexOf('player') > -1 || embed.rel.indexOf('gifv') > -1) {
+						context.show_label = 'view media';
+						context.hide_label = 'hide media';
+						context.more_label = 'view on';
 
 					} else if (embed.rel.indexOf('image') > -1) {
-						context.show_label = 'show image';
+						context.show_label = 'view image';
 						context.hide_label = 'hide image';
 						context.more_label = 'view on';
 
 					} else if (embed.rel.indexOf('file') > -1) {
-						context.show_label = 'see file';
+						context.show_label = 'view file';
 						context.hide_label = 'hide file';
 
+					} else if (embed.rel.indexOf('app') > -1 || embed.rel.indexOf('reader') > -1) {
+						context.show_label = 'view it';
+						context.hide_label = 'hide it';
+
 					} else {
-						context.show_label = 'show details';
+						context.show_label = 'view details';
 						context.hide_label = 'hide details';
 
 						if (embed.meta.media == 'reader') {
