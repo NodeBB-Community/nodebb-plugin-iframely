@@ -157,7 +157,12 @@ iframely.replace = function(raw, options, callback) {
 
 					var context = {};
 
-					context.domain = getDomain(embed);
+					if (embed.rel.indexOf('file') > -1) {
+						context.domain = getFilename(embed);
+					} else {
+						context.domain = getDomain(embed);
+					}
+
 					context.description = shortenText(embed.meta.description, 300);
 
 					if (embed.rel.indexOf('player') > -1 || embed.rel.indexOf('gifv') > -1) {
@@ -168,7 +173,12 @@ iframely.replace = function(raw, options, callback) {
 					} else if (embed.rel.indexOf('image') > -1) {
 						context.show_label = 'view image';
 						context.hide_label = 'hide image';
-						context.more_label = 'view on';
+
+						if (embed.rel.indexOf('file') > -1) {
+							context.more_label = null;
+						} else {
+							context.more_label = 'view on';
+						}
 
 					} else if (embed.rel.indexOf('file') > -1) {
 						context.show_label = 'view file';
@@ -434,6 +444,15 @@ function getDate(date) {
 function getImage(embed) {
 	var image = (embed.links.thumbnail && embed.links.thumbnail[0]) || (embed.links.image && embed.links.image[0]);
 	return image && image.href;
+}
+
+function getFilename(embed) {
+	var m = embed.url.match(/([^\/\.]+\.[^\/\.]+)(?:\?.*)?$/);
+	if (m) {
+		return m[1];
+	} else {
+		return getDomain(embed);
+	}
 }
 
 module.exports = iframely;
