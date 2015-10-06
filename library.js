@@ -108,12 +108,25 @@ iframely.replace = function(raw, options, callback) {
 			function(embeds, next) {
 				async.reduce(embeds.filter(Boolean), raw, function(html, embed, next) {
 
+					var replaceRegex = new RegExp('<a.+?href="' + embed.url.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&") + '".*?>.*?</a>', 'g');
+
 					if (embed.rel.indexOf('summary') > -1 && embed.rel.indexOf('app') === -1) {
 						// Skip summary cards.
-						return next(null, html);
-					}
+						var image = getImage(embed);
+						if (image) {
+							embed.html = '<img src="' + image + '" />';
+						} else {
+							app.render('partials/iframely-link-title', {embed: embed}, function(err, parsed) {
 
-					var replaceRegex = new RegExp('<a.+?href="' + embed.url.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&") + '".*?>.*?</a>', 'g');
+								if (err) {
+									winston.error('[plugin/iframely] Could not parse embed! ' + err.message);
+									return next(null, html);
+								}
+
+								next(null, html.replace(replaceRegex, parsed));
+							});
+						}
+					}
 
 					// Start detect collapsed.
 
@@ -158,7 +171,7 @@ iframely.replace = function(raw, options, callback) {
 						context.more_label = 'view on';
 
 					} else if (embed.rel.indexOf('file') > -1) {
-						context.show_label = 'show file';
+						context.show_label = 'see file';
 						context.hide_label = 'hide file';
 
 					} else {
@@ -229,7 +242,7 @@ iframely.replace = function(raw, options, callback) {
 							context.widget_html = embed_widget;
 						}
 
-						app.render('partials/iframely-embed', context, function(err, parsed) {
+						app.render('partials/iframely-widget-wrapper', context, function(err, parsed) {
 							if (err) {
 								winston.error('[plugin/iframely] Could not parse embed! ' + err.message);
 								return next(null, html);
@@ -239,10 +252,10 @@ iframely.replace = function(raw, options, callback) {
 						});
 					}
 
-					if (embed.rel.indexOf('app') > -1) {
+					if (embed.rel.indexOf('app') > -1 || embed.rel.indexOf('reader') > -1 || embed.rel.indexOf('survey') > -1) {
 						renderWidgetWrapper(null, embed.html);
 					} else {
-						app.render('partials/embed-widget', context, renderWidgetWrapper);
+						app.render('partials/iframely-widget-card', context, renderWidgetWrapper);
 					}
 
 				}, next);
@@ -412,6 +425,11 @@ function getDate(date) {
 	}
 
 	return onDate;
+}
+
+function getImage(embed) {
+	var image = (embed.links.thumbnail && embed.links.thumbnail[0]) || (embed.links.image && embed.links.image[0]);
+	return image && image.href;
 }
 
 module.exports = iframely;
