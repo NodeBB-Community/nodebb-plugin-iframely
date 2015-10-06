@@ -40,11 +40,11 @@
 		<div class="col-sm-10 col-xs-12">
 			<div class="form-group">
 				<label for="expandDomains">Always expand previews for these domains:</label>
-				<input type="text" id="expandDomains" name="expandDomains" class="form-control" placeholder="domain.com" />
+				<input type="text" id="expandDomains" name="expandDomains" class="form-control" placeholder="www.domain.com" />
 			</div>
 			<div class="form-group">
 				<label for="collapseDomains">Always collapse previews for these domains</label>
-				<input type="text" id="collapseDomains" name="collapseDomains" class="form-control" placeholder="domain.com" />
+				<input type="text" id="collapseDomains" name="collapseDomains" class="form-control" placeholder="www.domain.com" />
 			</div>
 		</div>
 	</div>
@@ -53,17 +53,11 @@
 		<div class="col-sm-2 col-xs-12 settings-header">Or ignore domains</div>
 		<div class="col-sm-10 col-xs-12">
 			<p>
-				Iframely won't even try to parse URLs from these domains .
+				Iframely won't even try to parse URLs from these domains.
 			</p>
-			<div class="checkbox">
-				<label for="enableBlacklist" class="mdl-switch mdl-js-switch mdl-js-ripple-effect">
-					<input type="checkbox" class="mdl-switch__input" id="enableBlacklist" name="enableBlacklist" />
-					<span class="mdl-switch__label">Use ignore-list</span>
-				</label>
-			</div>
 			<div class="form-group">
-				<label for="blacklist">Skip domains:</label>
-				<input type="text" id="blacklist" name="blacklist" class="form-control" placeholder="domain.com" />
+				<label for="blacklist">Domains to skip:</label>
+				<input type="text" id="blacklist" name="blacklist" class="form-control" placeholder="www.domain.com" />
 			</div>
 		</div>
 

@@ -140,7 +140,7 @@ iframely.replace = function(raw, options, callback) {
 					}
 
 					// Expand small image.
-					if (votes === 0 && embed.rel.indexOf('file') > -1 && embed.rel.indexOf('image') > -1) {
+					if (votes===0 && (embed.rel.indexOf('file') > -1 && embed.rel.indexOf('image') > -1) || embed.rel.indexOf('gifv') > -1) {
 						var size = embed.links.file && embed.links.file[0].content_length;
 						if (size < 200 * 1024) {
 							collapseWidget = false;
@@ -330,11 +330,7 @@ iframely.query = function(url, callback) {
 };
 
 function hostInBlacklist(host) {
-	if (iframely.config.enableBlacklist === 'on') {
-		return iframely.config.blacklist.indexOf(host) > -1;
-	} else {
-		return false;
-	}
+	return iframely.config.blacklist && iframely.config.blacklist.indexOf(host) > -1;
 }
 
 function alwaysExpandDomain(urlToCheck) {
