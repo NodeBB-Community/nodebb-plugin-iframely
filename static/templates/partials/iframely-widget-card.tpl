@@ -8,11 +8,11 @@
             </div>
             <!-- ENDIF meta -->
 
-            <!-- IF embed.meta.title -->
+            <!-- IF title -->
             <h4 class="media-heading">
-                <a href="{embed.url}" target="_blank" rel="nofollow" class="one-line">{embed.meta.title}</a>
+                <a href="{embed.url}" target="_blank" rel="nofollow" class="one-line">{title}</a>
             </h4>
-            <!-- ENDIF embed.meta.title -->
+            <!-- ENDIF title -->
 
             <div class="media">
                 {embed.html}

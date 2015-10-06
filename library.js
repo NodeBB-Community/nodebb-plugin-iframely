@@ -174,12 +174,20 @@ iframely.replace = function(raw, options, callback) {
 						context.domain = getDomain(embed);
 					}
 
+					context.title = shortenText(embed.meta.title, 200);
 					context.description = shortenText(embed.meta.description, 300);
 
 					if (embed.rel.indexOf('player') > -1 || embed.rel.indexOf('gifv') > -1) {
 						context.show_label = 'view media';
 						context.hide_label = 'hide media';
-						context.more_label = 'view on';
+
+						if (embed.rel.indexOf('gifv') > -1) {
+							context.title = null;
+							context.description = null;
+							context.more_label = null;
+						} else {
+							context.more_label = 'view on';
+						}
 
 					} else if (embed.rel.indexOf('image') > -1) {
 						context.show_label = 'view image';
