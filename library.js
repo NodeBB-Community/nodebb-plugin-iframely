@@ -320,8 +320,11 @@ iframely.query = function(data, callback) {
 		winston.verbose('[plugin/iframely] Querying \'' + data.url + '\' via Iframely...')
 
 		if (iframely.config.endpoint) {
+			var iframelyAPI = /^https?:\/\//i.test(iframely.config.endpoint) ? iframely.config.endpoint : iframely['apiBase'] + '&api_key=' + iframely.config.endpoint;
+			iframelyAPI += (iframelyAPI.indexOf('?') > -1 ? '&' : '?') + 'url=' + data.url;
+
 			request({
-				url: (/^https?:\/\//i.test(iframely.config.endpoint) ? iframely.config.endpoint : iframely['apiBase'] + '&api_key=' + iframely.config.endpoint) + '&url=' + data.url,
+				url: iframelyAPI,
 				json: true
 			}, function(err, res, body) {
 				if (err) {
