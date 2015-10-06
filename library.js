@@ -73,7 +73,8 @@ iframely.replace = function(raw, options, callback) {
 		 *	instead of a plain string, call self.
 		 */
 		iframely.replace(raw.postData.content, {
-			votes: parseInt(raw.postData.votes)
+			votes: parseInt(raw.postData.votes),
+			isPost: true
 		}, function(err, html) {
 			raw.postData.content = html;
 			return callback(err, raw);
@@ -130,7 +131,7 @@ iframely.replace = function(raw, options, callback) {
 					// Start detect collapsed/expanded mode.
 
 					var collapseWidget = true;
-					var votes = typeof options.votes === 'number' ? options.votes : 0;
+					var votes = (options && typeof options.votes === 'number') ? options.votes : 0;
 
 					if (options) {
 						if (votes >= getIntValue(iframely.config.expandOnVotesCount, 0)) {
@@ -139,7 +140,7 @@ iframely.replace = function(raw, options, callback) {
 					}
 
 					// Expand small image.
-					if (votes===0 && embed.rel.indexOf('file') > -1 && embed.rel.indexOf('image') > -1) {
+					if (votes === 0 && embed.rel.indexOf('file') > -1 && embed.rel.indexOf('image') > -1) {
 						var size = embed.links.file && embed.links.file[0].content_length;
 						if (size < 200 * 1024) {
 							collapseWidget = false;
@@ -149,6 +150,11 @@ iframely.replace = function(raw, options, callback) {
 					if (alwaysCollapseDomain(embed.url)) {
 						collapseWidget = true;
 					} else if (alwaysExpandDomain(embed.url)) {
+						collapseWidget = false;
+					}
+
+					if (!options || !options.isPost) {
+						// Expand preview.
 						collapseWidget = false;
 					}
 
