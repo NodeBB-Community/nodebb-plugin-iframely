@@ -138,6 +138,14 @@ iframely.replace = function(raw, options, callback) {
 						collapseWidget = false;
 					}
 
+					// Expand small image.
+					if (embed.rel.indexOf('file') > -1 && embed.rel.indexOf('image') > -1) {
+						var size = embed.links.file && embed.links.file[0].content_length;
+						if (size < 200 * 1024) {
+							collapseWidget = false;
+						}
+					}
+
 					if (options && typeof options.votes === 'number') {
 
 						if (iframely.config.collapseOnVotes === 'on') {
