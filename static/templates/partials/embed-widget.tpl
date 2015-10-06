@@ -2,35 +2,11 @@
     <div class="panel-body">
         <div class="media iframely-embed">
 
+            <!-- IF meta -->
             <div class="text-muted iframely-meta one-line">
-                {embed.meta.author}
-
-                <!-- IF date -->
-                &nbsp;&nbsp;/&nbsp;&nbsp;
-                {date}
-                <!-- ENDIF date -->
-
-                <!-- IF price -->
-                &nbsp;&nbsp;/&nbsp;&nbsp;
-                {price}
-                <!-- ENDIF price -->
-
-                <!-- IF duration -->
-                &nbsp;&nbsp;/&nbsp;&nbsp;
-                {duration}
-                <!-- ENDIF duration -->
-
-                <!-- IF views -->
-                &nbsp;&nbsp;/&nbsp;&nbsp;
-                {views} views
-                <!-- ENDIF views -->
-
-                <!-- IF category -->
-                &nbsp;&nbsp;/&nbsp;&nbsp;
-                {category}
-                <!-- ENDIF category -->
-
+                {meta}
             </div>
+            <!-- ENDIF meta -->
 
             <h4 class="media-heading">
                 <a href="{embed.url}" target="_blank" rel="nofollow" class="one-line">{embed.meta.title}</a>

@@ -141,7 +141,6 @@ iframely.replace = function(raw, options, callback) {
 
 					context.domain = getDomain(embed);
 					context.description = shortenText(embed.meta.description, 300);
-					context.date = getDate(embed.meta.date);
 
 					if (embed.rel.indexOf('player') > -1) {
 						context.show_label = 'show player';
@@ -170,11 +169,41 @@ iframely.replace = function(raw, options, callback) {
 						}
 					}
 
+					// Format meta info.
+					var meta = [];
+
+					if (embed.meta.author) {
+						meta.push(embed.meta.author);
+					}
+
+					var date = getDate(embed.meta.date);
+					if (date) {
+						meta.push(date);
+					}
+
 					var currency = embed.meta.currency_code || embed.meta.currency;
-					context.price = embed.meta.price ? (embed.meta.price + (currency ? (' ' + currency) : '')) : null;
-					context.duration = getDuration(embed.meta.duration);
-					context.views = getViews(embed.meta.views);
-					context.category = embed.meta.category;
+					var price = embed.meta.price ? (embed.meta.price + (currency ? (' ' + currency) : '')) : null;
+					if (price) {
+						meta.push(price);
+					}
+
+					var duration = getDuration(embed.meta.duration);
+					if (duration) {
+						meta.push(duration);
+					}
+
+					var views = getViews(embed.meta.views);
+					if (views) {
+						meta.push(views);
+					}
+
+					if (embed.meta.category) {
+						meta.push(embed.meta.category);
+					}
+
+					context.meta = meta.join('&nbsp;&nbsp;/&nbsp;&nbsp;');
+
+					// END Format meta info.
 
 					context.embed = embed;
 
