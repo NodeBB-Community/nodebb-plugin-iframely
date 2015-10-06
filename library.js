@@ -15,8 +15,7 @@ var controllers = require('./lib/controllers'),
 
 	iframely = {
 		config: undefined,
-		apiBase: 'http://nodebb.iframe.ly/api',
-		apiBaseWithKey: 'https://iframe.ly/api',
+		apiBase: 'https://iframe.ly/api/iframely?origin=nodebb&align=center',
 		cache: LRU({
 			maxAge: 1000*60*60*24	// one day
 		}),
@@ -101,7 +100,7 @@ iframely.replace = function(raw, options, callback) {
 		});
 
 		async.waterfall([
-			// Query urls from iFramely, in batches of 10
+			// Query urls from Iframely, in batches of 10
 			async.apply(async.mapLimit, urls, 10, iframely.query),
 
 			// Replace post text as necessary
@@ -119,7 +118,7 @@ iframely.replace = function(raw, options, callback) {
 							app.render('partials/iframely-link-title', {embed: embed}, function(err, parsed) {
 
 								if (err) {
-									winston.error('[plugin/iframely] Could not parse embed! ' + err.message);
+									winston.error('[plugin/iframely] Could not parse embed: ' + err.message);
 									return next(null, html);
 								}
 
@@ -128,29 +127,21 @@ iframely.replace = function(raw, options, callback) {
 						}
 					}
 
-					// Start detect collapsed.
+					// Start detect collapsed/expanded mode.
 
-					var collapseWidget = iframely.config.mode === 'alwaysCollapse';
+					var collapseWidget = true;
+					var votes = typeof options.votes === 'number' ? options.votes : 0;
+
+					if (options) {
+						if (options.votes >= getIntValue(iframely.config.collapseOnVotesCount, 0)) {
+							collapseWidget = false;
+						}
+					}
 
 					if (alwaysCollapseDomain(embed.url)) {
 						collapseWidget = true;
 					} else if (alwaysExpandDomain(embed.url)) {
 						collapseWidget = false;
-					}
-
-					if (options && typeof options.votes === 'number') {
-
-						if (iframely.config.collapseOnVotes === 'on') {
-							if (options.votes <= getIntValue(iframely.config.collapseOnVotesCount, -1)) {
-								collapseWidget = true;
-							}
-						}
-
-						if (iframely.config.expandOnVotes === 'on') {
-							if (options.votes >= getIntValue(iframely.config.expandOnVotesCount, 1)) {
-								collapseWidget = false;
-							}
-						}
 					}
 
 					// End detect collapsed.
@@ -232,7 +223,7 @@ iframely.replace = function(raw, options, callback) {
 					function renderWidgetWrapper(err, embed_widget) {
 
 						if (err) {
-							winston.error('[plugin/iframely] Could not parse embed! ' + err.message);
+							winston.error('[plugin/iframely] Could not parse embed: ' + err.message);
 							return next(null, html);
 						}
 
@@ -275,23 +266,28 @@ iframely.query = function(url, callback) {
 			callback(null, iframely.cache.get(url));
 		});
 	} else {
-		winston.verbose('[plugin/iframely] Querying \'' + url + '\' via iFramely...')
-		request({
-			url: iframely[iframely.config.key ? 'apiBaseWithKey' : 'apiBase'] + '/iframely?url=' + url + (iframely.config.key ? '?api_key=' + iframely.config.key : ''),
-			json: true
-		}, function(err, res, body) {
-			if (err) {
-				winston.error('[plugin/iframely] Encountered error querying iFramely API: ' + err.message);
-				return callback();
-			} else {
-				if (res.statusCode === 200 && body) {
-					iframely.cache.set(url, body);
-					return callback(null, body);
-				} else {
+		winston.verbose('[plugin/iframely] Querying \'' + url + '\' via Iframely...')
+
+		if (iframely.config.endpoint) {
+			request({
+				url: (/^https?:\/\//i.test(iframely.config.endpoint) ? iframely.config.endpoint : iframely['apiBase'] + '&api_key=' + iframely.config.endpoint) + '&url=' + url,
+				json: true
+			}, function(err, res, body) {
+				if (err) {
+					winston.error('[plugin/iframely] Encountered error querying Iframely API: ' + err.message);
 					return callback();
+				} else {
+					if (res.statusCode === 200 && body) {
+						iframely.cache.set(url, body);
+						return callback(null, body);
+					} else {
+						return callback();
+					}
 				}
-			}
-		});
+			});
+		} else {
+			winston.error('[plugin/iframely] No API key or endpoint configured, skipping Iframely');
+		}
 	}
 };
 
