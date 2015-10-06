@@ -81,24 +81,33 @@ iframely.replace = function(raw, options, callback) {
 		});
 	} else {
 		var urls = [],
+			urlsDict = {},
 			match;
 
 		// Isolate matches
 		while(match = iframely.htmlRegex.exec(raw)) {
 			// Only match if it is a naked link (no anchor text)
 
-			var target = url.parse(match[1]),
-				text = url.parse(match[2]);
+			var target = url.parse(match[1]);
 
-			if (((match[1] === match[2]) || (target.host + target.path === match[2])) && !hostInBlacklist(target.host)) {
-				urls.push(match[1]);
+			if ((
+				(match[1] === match[2]) ||
+				(match[1] === encodeURI(match[2])) ||
+				(target.host + target.path === match[2])
+
+				) && !hostInBlacklist(target.host)) {
+
+				var uri = match[1];
+
+				// Eliminate duplicates and internal links
+				if (!(uri in urlsDict) && uri.indexOf(nconf.get('url')) !== 0) {
+					urls.push({
+						match: match[0],
+						url: uri
+					});
+				}
 			}
 		}
-
-		// Eliminate duplicates and internal links
-		urls = urls.filter(function(url, idx) {
-			return urls.indexOf(url) === idx && url.indexOf(nconf.get('url')) !== 0;
-		});
 
 		async.waterfall([
 			// Query urls from Iframely, in batches of 10
@@ -106,9 +115,10 @@ iframely.replace = function(raw, options, callback) {
 
 			// Replace post text as necessary
 			function(embeds, next) {
-				async.reduce(embeds.filter(Boolean), raw, function(html, embed, next) {
+				async.reduce(embeds.filter(Boolean), raw, function(html, data, next) {
 
-					var replaceRegex = new RegExp('<a.+?href="' + embed.url.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&") + '".*?>.*?</a>', 'g');
+					var embed = data.embed;
+					var match = data.match;
 
 					if (embed.rel.indexOf('summary') > -1 && embed.rel.indexOf('app') === -1) {
 						// Skip summary cards.
@@ -123,7 +133,7 @@ iframely.replace = function(raw, options, callback) {
 									return next(null, html);
 								}
 
-								next(null, html.replace(replaceRegex, parsed));
+								next(null, html.replace(match, parsed));
 							});
 						}
 					}
@@ -281,7 +291,7 @@ iframely.replace = function(raw, options, callback) {
 								return next(null, html);
 							}
 
-							next(null, html.replace(replaceRegex, parsed));
+							next(null, html.replace(match, parsed));
 						});
 					}
 
@@ -297,18 +307,21 @@ iframely.replace = function(raw, options, callback) {
 	}
 };
 
-iframely.query = function(url, callback) {
-	if (iframely.cache.has(url)) {
-		winston.verbose('[plugin/iframely] Retrieving \'' + url + '\' from cache...');
+iframely.query = function(data, callback) {
+	if (iframely.cache.has(data.url)) {
+		winston.verbose('[plugin/iframely] Retrieving \'' + data.url + '\' from cache...');
 		setImmediate(function() {
-			callback(null, iframely.cache.get(url));
+			callback(null, {
+				match: data.match,
+				embed: iframely.cache.get(data.url)
+			});
 		});
 	} else {
-		winston.verbose('[plugin/iframely] Querying \'' + url + '\' via Iframely...')
+		winston.verbose('[plugin/iframely] Querying \'' + data.url + '\' via Iframely...')
 
 		if (iframely.config.endpoint) {
 			request({
-				url: (/^https?:\/\//i.test(iframely.config.endpoint) ? iframely.config.endpoint : iframely['apiBase'] + '&api_key=' + iframely.config.endpoint) + '&url=' + url,
+				url: (/^https?:\/\//i.test(iframely.config.endpoint) ? iframely.config.endpoint : iframely['apiBase'] + '&api_key=' + iframely.config.endpoint) + '&url=' + data.url,
 				json: true
 			}, function(err, res, body) {
 				if (err) {
@@ -316,8 +329,11 @@ iframely.query = function(url, callback) {
 					return callback();
 				} else {
 					if (res.statusCode === 200 && body) {
-						iframely.cache.set(url, body);
-						return callback(null, body);
+						iframely.cache.set(data.url, body);
+						return callback(null, {
+							match: data.match,
+							embed: body
+						});
 					} else {
 						return callback();
 					}

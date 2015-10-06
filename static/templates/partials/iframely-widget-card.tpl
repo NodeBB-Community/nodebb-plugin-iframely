@@ -14,9 +14,11 @@
             </h4>
             <!-- ENDIF title -->
 
+            <!-- IF embed.html -->
             <div class="media">
                 {embed.html}
             </div>
+            <!-- ENDIF embed.html -->
 
             <!-- IF description -->
             <p class="description">
