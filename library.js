@@ -299,6 +299,10 @@ function getDuration(duration) {
 		var hours = Math.floor(minutes / 60);
 		minutes = minutes % 60;
 
+		if (seconds < 10) {
+			seconds = '0' + seconds;
+		}
+
 		if (minutes < 10) {
 			minutes = '0' + minutes;
 		}
@@ -307,13 +311,20 @@ function getDuration(duration) {
 	}
 }
 
+function numberWithCommas(x) {
+	var parts = x.toString().split(".");
+	parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, "'");
+	return parts.join(".");
+}
+
 function getViews(views) {
 	if (views) {
-		if (views > 1000) {
-			// TODO: decimal separator.
-			return Math.round(views / 1000) + 'K';
+		if (views > 1000000) {
+			return numberWithCommas((views / 1000000).toFixed(1)) + 'Mln';
+		} else if (views > 1000) {
+			return numberWithCommas((views / 1000).toFixed(1)) + 'K';
 		} else {
-			return views;
+			return numberWithCommas(views);
 		}
 	}
 }
