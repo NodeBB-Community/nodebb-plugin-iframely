@@ -159,6 +159,12 @@ iframely.replace = function(raw, options, callback) {
 
 					if (embed.rel.indexOf('file') > -1) {
 						context.domain = getFilename(embed);
+						if (embed.rel.indexOf('image') > -1) {
+							var size = getFilesize(embed);
+							if (size) {
+								context.domain += ' (' + size + ')';
+							}
+						}
 					} else {
 						context.domain = getDomain(embed);
 					}
@@ -452,6 +458,24 @@ function getFilename(embed) {
 		return m[1];
 	} else {
 		return getDomain(embed);
+	}
+}
+
+function getFilesize(embed) {
+	var content_length = parseInt(embed.links.file[0].content_length);
+	if (!isNaN(content_length)) {
+		if (content_length > 1024*1024) {
+			content_length = Math.round(content_length / (1024 * 1024)) + ' MB';
+		} else {
+			content_length = content_length / 1024;
+			if (content_length < 10) {
+				content_length = content_length.toFixed(1);
+			} else {
+				content_length = Math.round(content_length);
+			}
+			content_length += ' KB'
+		}
+		return content_length;
 	}
 }
 
