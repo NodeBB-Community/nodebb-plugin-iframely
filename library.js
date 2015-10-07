@@ -8,10 +8,12 @@ var controllers = require('./lib/controllers'),
 	winston = module.parent.require('winston'),
 	templates = module.parent.require('templates.js'),
 	translator = require.main.require('./public/src/modules/translator'),
+	meta = require.main.require('./src/meta'),
 
 	postCache = module.parent.require('./posts/cache'),
 	LRU = require('lru-cache'),
 	url = require('url'),
+	moment = require('moment'),
 	escapeHtml = require('escape-html'),
 
 	iframely = {
@@ -507,26 +509,15 @@ function getDomain(embed) {
 
 function getDate(date) {
 
-	var months = [
-		"Jan",
-		"Feb",
-		"March",
-		"April",
-		"May",
-		"June",
-		"July",
-		"Aug",
-		"Sept",
-		"Oct",
-		"Nov",
-		"Dec"
-	];
-
 	var onDate = '';
 	if (date) {
 		date = new Date(date);
 		if (date && !isNaN(date.getTime())) {
-			onDate = months[date.getMonth()] + ' ' + date.getDate();
+
+			var language = meta.config.defaultLang || 'en_GB';
+
+			onDate = moment(date).locale(language).format('MMM D');
+
 			if (date.getFullYear() !== new Date().getFullYear()) {
 				onDate = onDate + ', ' + date.getFullYear();
 			}
