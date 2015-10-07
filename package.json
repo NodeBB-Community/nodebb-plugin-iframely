@@ -10,7 +10,15 @@
   "keywords": [
     "nodebb",
     "plugin",
-    "iframely"
+    "iframely",
+    "embed",
+    "oembed"
+    "youtube",
+    "gfycat",
+    "giphy",
+    "imgur",    
+    "unfurl",
+    "onebox"
   ],
   "author": {
     "name": "Julian Lam",

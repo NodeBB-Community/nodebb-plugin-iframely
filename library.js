@@ -18,7 +18,7 @@ var controllers = require('./lib/controllers'),
 
 	iframely = {
 		config: undefined,
-		apiBase: 'https://iframe.ly/api/iframely?origin=nodebb&align=center',
+		apiBase: 'https://iframe.ly/api/iframely?origin=nodebb&align=left',
 		cache: LRU({
 			maxAge: 1000*60*60*24	// one day
 		}),
