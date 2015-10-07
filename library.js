@@ -7,6 +7,7 @@ var controllers = require('./lib/controllers'),
 	nconf = module.parent.require('nconf'),
 	winston = module.parent.require('winston'),
 	templates = module.parent.require('templates.js'),
+	translator = require.main.require('./public/src/modules/translator'),
 
 	postCache = module.parent.require('./posts/cache'),
 	LRU = require('lru-cache'),
@@ -23,6 +24,23 @@ var controllers = require('./lib/controllers'),
 	},
 	app;
 
+var USED_WORDS = [
+	"view-media",
+	"hide-media",
+	"view-on",
+	"view-image",
+	"hide-image",
+	"view-file",
+	"hide-file",
+	"view-it",
+	"hide-it",
+	"view-details",
+	"hide-details",
+	"read-on",
+	"visit"
+];
+
+
 iframely.init = function(params, callback) {
 	var router = params.router,
 		hostMiddleware = params.middleware,
@@ -34,7 +52,11 @@ iframely.init = function(params, callback) {
 	router.get('/api/admin/plugins/iframely', controllers.renderAdminPage);
 
 	meta.settings.get('iframely', function(err, config) {
+
 		config.blacklist = (config.blacklist && config.blacklist.split(',')) || [];
+		config.expandDomains = (config.expandDomains && config.expandDomains.split(',')) || [];
+		config.collapseDomains = (config.collapseDomains && config.collapseDomains.split(',')) || [];
+
 		iframely.config = config;
 	});
 
@@ -110,11 +132,24 @@ iframely.replace = function(raw, options, callback) {
 		}
 
 		async.waterfall([
-			// Query urls from Iframely, in batches of 10
-			async.apply(async.mapLimit, urls, 10, iframely.query),
 
-			// Replace post text as necessary
-			function(embeds, next) {
+			function(cb) {
+
+				async.parallel({
+
+					// Query urls from Iframely, in batches of 10
+					embeds: async.apply(async.mapLimit, urls, 10, iframely.query),
+
+					words: getTranslationsDict
+
+				}, cb);
+			},
+
+			function(data, next) {
+
+				var embeds = data.embeds;
+				var words = data.words;
+
 				async.reduce(embeds.filter(Boolean), raw, function(html, data, next) {
 
 					var embed = data.embed;
@@ -135,6 +170,7 @@ iframely.replace = function(raw, options, callback) {
 
 								next(null, html.replace(match, parsed));
 							});
+							return;
 						}
 					}
 
@@ -188,45 +224,45 @@ iframely.replace = function(raw, options, callback) {
 					context.description = shortenText(embed.meta.description, 300);
 
 					if (embed.rel.indexOf('player') > -1 || embed.rel.indexOf('gifv') > -1) {
-						context.show_label = 'view media';
-						context.hide_label = 'hide media';
+						context.show_label = words['view-media'];
+						context.hide_label = words['hide-media'];
 
 						if (embed.rel.indexOf('gifv') > -1) {
 							context.title = null;
 							context.description = null;
 							context.more_label = null;
 						} else {
-							context.more_label = 'view on';
+							context.more_label = words['view-on'];
 						}
 
 					} else if (embed.rel.indexOf('image') > -1) {
-						context.show_label = 'view image';
-						context.hide_label = 'hide image';
+						context.show_label = words['view-image'];
+						context.hide_label = words['hide-image'];
 
 						if (embed.rel.indexOf('file') > -1) {
 							context.more_label = null;
 						} else {
-							context.more_label = 'view on';
+							context.more_label = words['view-on'];
 						}
 
 					} else if (embed.rel.indexOf('file') > -1) {
-						context.show_label = 'view file';
-						context.hide_label = 'hide file';
+						context.show_label = words['view-file'];
+						context.hide_label = words['hide-file'];
 
 					} else if (embed.rel.indexOf('app') > -1 || embed.rel.indexOf('reader') > -1) {
-						context.show_label = 'view it';
-						context.hide_label = 'hide it';
+						context.show_label = words['view-it'];
+						context.hide_label = words['hide-it'];
 
 					} else {
-						context.show_label = 'view details';
-						context.hide_label = 'hide details';
+						context.show_label = words['view-details'];
+						context.hide_label = words['hide-details'];
 
 						if (embed.meta.media == 'reader') {
 							// TODO: check usage.
-							context.more_label = 'read on';
+							context.more_label = words['read-on'];
 						} else if (!embed.html) {
 							// TODO: check usage.
-							context.more_label = 'visit';
+							context.more_label = words['visit'];
 						}
 					}
 
@@ -303,7 +339,15 @@ iframely.replace = function(raw, options, callback) {
 
 				}, next);
 			}
-		], callback);
+
+		], function(error, html) {
+
+			if (error) {
+				winston.error('[plugin/iframely] Could not parse embed! ' + err.message);
+			}
+
+			callback(null, html);
+		});
 	}
 };
 
@@ -360,6 +404,18 @@ function alwaysExpandDomain(urlToCheck) {
 function alwaysCollapseDomain(urlToCheck) {
 	var parsed = url.parse(urlToCheck);
 	return iframely.config.collapseDomains && iframely.config.collapseDomains.indexOf(parsed.host) > -1;
+}
+
+function getTranslationsDict(cb) {
+	var dict = {};
+	async.each(USED_WORDS, function(word, cb) {
+		translator.translate('[[iframely:' + word + ']]', function(translated) {
+			dict[word] = translated;
+			cb();
+		});
+	}, function(error) {
+		cb(error, dict);
+	});
 }
 
 function getIntValue(value, defaultValue) {
