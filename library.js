@@ -428,7 +428,7 @@ function wrapHtmlImages(html) {
 
 function wrapImage(url) {
 
-	if (url && iframely.config.camoProxyKey && iframely.config.camoProxyHost) {
+	if (url && iframely.config.camoProxyKey && iframely.config.camoProxyHost && url.indexOf(iframely.config.camoProxyHost) === -1) {
 
 		var hexDigest, hexEncodedPath;
 
