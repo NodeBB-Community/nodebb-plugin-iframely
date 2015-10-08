@@ -15,6 +15,7 @@ var controllers = require('./lib/controllers'),
 	url = require('url'),
 	moment = require('moment'),
 	escapeHtml = require('escape-html'),
+    crypto = require('crypto'),
 
 	iframely = {
 		config: undefined,
@@ -161,7 +162,7 @@ iframely.replace = function(raw, options, callback) {
 						// Skip summary cards.
 						var image = getImage(embed);
 						if (image) {
-							embed.html = '<img src="' + image + '" />';
+							embed.html = '<img src="' + wrapImage(image) + '" />';
 						} else {
 							app.render('partials/iframely-link-title', {embed: embed}, function(err, parsed) {
 
@@ -224,6 +225,8 @@ iframely.replace = function(raw, options, callback) {
 
 					context.title = shortenText(embed.meta.title, 200);
 					context.description = shortenText(embed.meta.description, 300);
+
+					context.favicon = wrapImage(embed.links.icon && embed.links.icon[0].href);
 
 					if (embed.rel.indexOf('player') > -1 || embed.rel.indexOf('gifv') > -1) {
 						context.show_label = words['view-media'];
@@ -406,6 +409,26 @@ function alwaysExpandDomain(urlToCheck) {
 function alwaysCollapseDomain(urlToCheck) {
 	var parsed = url.parse(urlToCheck);
 	return iframely.config.collapseDomains && iframely.config.collapseDomains.indexOf(parsed.host) > -1;
+}
+
+function wrapImage(url) {
+
+	if (iframely.config.camoProxyKey && iframely.config.camoProxyHost) {
+
+		var hexDigest, hexEncodedPath;
+
+		hexDigest = crypto.createHmac('sha1', iframely.config.camoProxyKey).update(url).digest('hex');
+		hexEncodedPath = (new Buffer(url)).toString('hex');
+
+		return [
+			iframely.config.camoProxyHost,
+			hexDigest,
+			hexEncodedPath
+		].join('/');
+
+	} else {
+		return url;
+	}
 }
 
 function getTranslationsDict(cb) {
