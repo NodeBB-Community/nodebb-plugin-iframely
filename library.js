@@ -436,7 +436,7 @@ function wrapImage(url) {
 		hexEncodedPath = (new Buffer(url)).toString('hex');
 
 		return [
-			iframely.config.camoProxyHost,
+			iframely.config.camoProxyHost.replace(/\/$/, ''),	// Remove tail '/'
 			hexDigest,
 			hexEncodedPath
 		].join('/');
