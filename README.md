@@ -13,6 +13,9 @@ Here's how it looks:
  * URL previews are similar to the ones in Twitter feed. They automatically expand or collapse based on the post's popular vote.
  * Optionally use [Camo Image Proxy](https://github.com/atmos/camo) to avoid image hot-linking and mixed-content warnings in SSL.
 
+## Heads up
+
+If you use the plugin with self-hosted Iframely version, please include `&group=true` to API endpoint address to match JSON format.
 
 ## Contribute
 
