@@ -11,22 +11,8 @@
 				</p>
 			</div>
 			<div class="form-group">
-				<label for="endpoint">API key or address</label>
+				<label for="endpoint">API key or address:</label>
 				<input type="text" id="endpoint" name="endpoint" title="API Key" class="form-control input-lg" placeholder="Your API Key or http:// endpoint" />
-			</div>
-		</div>
-	</div>
-
-	<div class="row">
-		<div class="col-sm-2 col-xs-12 settings-header">Camo Proxy</div>
-		<div class="col-sm-10 col-xs-12">
-			<div class="form-group">
-				<label for="endpoint">camoProxyHost</label>
-				<input type="text" id="camoProxyHost" name="camoProxyHost" class="form-control input-lg" placeholder="camoProxyHost" />
-			</div>
-			<div class="form-group">
-				<label for="endpoint">camoProxyKey</label>
-				<input type="text" id="camoProxyKey" name="camoProxyKey" class="form-control input-lg" placeholder="camoProxyKey" />
 			</div>
 		</div>
 	</div>
@@ -75,6 +61,23 @@
 			</div>
 		</div>
 
+	</div>
+
+	<div class="row">
+		<div class="col-sm-2 col-xs-12 settings-header">Image Proxy</div>
+		<div class="col-sm-10 col-xs-12">
+			<div class="form-group">
+				<p>
+					Optional (but recommended) <a href="https://github.com/atmos/camo" target="_blank">Camo</a> server settings to proxy images under SSL and avoid hot-linking.
+				</p>				
+				<label for="endpoint">Camo Proxy Host:</label>
+				<input type="text" id="camoProxyHost" name="camoProxyHost" class="form-control input-lg" placeholder="http://" />
+			</div>
+			<div class="form-group">
+				<label for="endpoint">Camo Hash Key:</label>
+				<input type="text" id="camoProxyKey" name="camoProxyKey" class="form-control input-lg" placeholder="" />
+			</div>
+		</div>
 	</div>
 
 </form>
