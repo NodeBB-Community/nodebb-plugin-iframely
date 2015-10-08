@@ -23,25 +23,24 @@ var controllers = require('./lib/controllers'),
 		cache: LRU({
 			maxAge: 1000*60*60*24	// one day
 		}),
-		htmlRegex: /<a.+?href="(.+?)".*?>(.*?)<\/a>/g
+		htmlRegex: /<a.+?href="(.+?)".*?>(.*?)<\/a>/g,
+		usedWords: [
+			"view-media",
+			"hide-media",
+			"view-on",
+			"view-image",
+			"hide-image",
+			"view-file",
+			"hide-file",
+			"view-it",
+			"hide-it",
+			"view-details",
+			"hide-details",
+			"read-on",
+			"visit"
+		]
 	},
 	app;
-
-var USED_WORDS = [
-	"view-media",
-	"hide-media",
-	"view-on",
-	"view-image",
-	"hide-image",
-	"view-file",
-	"hide-file",
-	"view-it",
-	"hide-it",
-	"view-details",
-	"hide-details",
-	"read-on",
-	"visit"
-];
 
 
 iframely.init = function(params, callback) {
@@ -307,6 +306,8 @@ iframely.replace = function(raw, options, callback) {
 
 					// END Format meta info.
 
+					embed.html = wrapHtmlImages(embed.html);
+
 					context.embed = embed;
 
 					function renderWidgetWrapper(err, embed_widget) {
@@ -411,9 +412,23 @@ function alwaysCollapseDomain(urlToCheck) {
 	return iframely.config.collapseDomains && iframely.config.collapseDomains.indexOf(parsed.host) > -1;
 }
 
+function wrapHtmlImages(html) {
+
+	if (html && iframely.config.camoProxyKey && iframely.config.camoProxyHost) {
+		return html.replace(/<img[^>]+src=["'][^'"]+["']/gi, function(item) {
+			var m = item.match(/(<img[^>]+src=["'])([^'"]+)(["'])/i);
+			var url = wrapImage(m[2]);
+			return m[1] + url + m[3];
+		});
+
+	} else {
+		return html;
+	}
+}
+
 function wrapImage(url) {
 
-	if (iframely.config.camoProxyKey && iframely.config.camoProxyHost) {
+	if (url && iframely.config.camoProxyKey && iframely.config.camoProxyHost) {
 
 		var hexDigest, hexEncodedPath;
 
@@ -433,7 +448,7 @@ function wrapImage(url) {
 
 function getTranslationsDict(cb) {
 	var dict = {};
-	async.each(USED_WORDS, function(word, cb) {
+	async.each(iframely.usedWords, function(word, cb) {
 		translator.translate('[[iframely:' + word + ']]', function(translated) {
 			dict[word] = translated;
 			cb();
