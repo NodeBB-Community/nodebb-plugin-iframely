@@ -157,7 +157,7 @@ iframely.replace = function(raw, options, callback) {
 					var embed = data.embed;
 					var match = data.match;
 
-					if (embed.rel.indexOf('summary') > -1 && embed.rel.indexOf('app') === -1) {
+					if (!embed.html || (embed.rel.indexOf('summary') > -1 && embed.rel.indexOf('app') === -1)) {
 						// Skip summary cards.
 						var image = getImage(embed);
 						if (image) {
