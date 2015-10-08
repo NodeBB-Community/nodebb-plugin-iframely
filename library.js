@@ -161,7 +161,7 @@ iframely.replace = function(raw, options, callback) {
 						// Skip summary cards.
 						var image = getImage(embed);
 						if (image) {
-							embed.html = '<img src="' + wrapImage(image) + '" />';
+							embed.html = '<img src="' + image + '" />';
 						} else {
 							app.render('partials/iframely-link-title', {embed: embed}, function(err, parsed) {
 
