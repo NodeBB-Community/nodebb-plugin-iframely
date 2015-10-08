@@ -1,27 +1,4 @@
 {
-    "api-settings-section":             "API Settings",
-
-    "api-settings-info-1":              "Use Iframely as a cloud or self-hosted <a href=\"https://github.com/itteco/iframely\" target=\"_blank\">open-source</a> API.",
-    "api-settings-info-2":              "Get API Key <a href=\"https://iframely.com\" target=\"_blank\">API key here</a>.",
-
-    "api-key-or-address-label":         "API key or address",
-    "api-key-or-address-placeholder":   "Your API Key or http:// endpoint",
-
-    "expand-on-votes-section":          "Expand/collapse Iframely previews",
-    "expand-on-votes-info-1":           "Iframely uses +/- vote to check when to expand URL previews and when to hide it.",
-    "expand-on-votes-info-2":           "To always expand unvoted posts, set 0 as a minumum vote.",
-    "expand-on-votes-label":            "Always expand previews when vote is over:",
-
-    "domains-settings-section":         "Previews for specific domains",
-    "domains-expand-label":             "Always expand previews for these domains:",
-    "domains-collapse-label":           "Always collapse previews for these domains:",
-
-    "blacklist-domains-section":        "Or ignore domains",
-    "blacklist-domains-info":           "Iframely won't even try to parse URLs from these domains.",
-    "blacklist-domains-label":          "Domains to skip:",
-
-
-
     "view-media":                       "view media",
     "hide-media":                       "hide media",
 
