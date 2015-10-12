@@ -163,7 +163,7 @@ iframely.replace = function(raw, options, callback) {
 						if (image) {
 							embed.html = '<img src="' + image + '" />';
 						} else {
-							app.render('partials/iframely-link-title', {embed: embed}, function(err, parsed) {
+							app.render('partials/iframely-link-title', {embed: embed}, function (err, parsed) {
 
 								if (err) {
 									winston.error('[plugin/iframely] Could not parse embed: ' + err.message);
@@ -188,16 +188,16 @@ iframely.replace = function(raw, options, callback) {
 					}
 
 					// Expand small image.
-					if (votes===0 && (embed.rel.indexOf('file') > -1 && embed.rel.indexOf('image') > -1) || embed.rel.indexOf('gifv') > -1) {
+					if (votes === 0 && (embed.rel.indexOf('file') > -1 && embed.rel.indexOf('image') > -1) || embed.rel.indexOf('gifv') > -1) {
 						var size = embed.links.file && embed.links.file[0].content_length;
 						if (size < 200 * 1024) {
 							collapseWidget = false;
 						}
 					}
 
-					if (alwaysCollapseDomain(embed.url)) {
+					if (alwaysCollapseDomain(embed.meta.canonical)) {
 						collapseWidget = true;
-					} else if (alwaysExpandDomain(embed.url)) {
+					} else if (alwaysExpandDomain(embed.meta.canonical)) {
 						collapseWidget = false;
 					}
 
@@ -327,7 +327,7 @@ iframely.replace = function(raw, options, callback) {
 							context.widget_html = embed_widget;
 						}
 
-						app.render('partials/iframely-widget-wrapper', context, function(err, parsed) {
+						app.render('partials/iframely-widget-wrapper', context, function (err, parsed) {
 							if (err) {
 								winston.error('[plugin/iframely] Could not parse embed! ' + err.message);
 								return next(null, html);
@@ -361,17 +361,29 @@ iframely.query = function(data, callback) {
 	if (iframely.cache.has(data.url)) {
 		winston.verbose('[plugin/iframely] Retrieving \'' + data.url + '\' from cache...');
 		setImmediate(function() {
-			callback(null, {
-				match: data.match,
-				embed: iframely.cache.get(data.url)
-			});
+			try {
+				callback(null, {
+					match: data.match,
+					embed: iframely.cache.get(data.url)
+				});
+			} catch(ex) {
+				winston.error('[plugin/iframely] Could not parse embed! ' + ex);
+				callback();
+			}
 		});
 	} else {
 		winston.verbose('[plugin/iframely] Querying \'' + data.url + '\' via Iframely...')
 
 		if (iframely.config.endpoint) {
-			var iframelyAPI = /^https?:\/\//i.test(iframely.config.endpoint) ? iframely.config.endpoint : iframely['apiBase'] + '&api_key=' + iframely.config.endpoint;
+
+			var custom_endpoint = /^https?:\/\//i.test(iframely.config.endpoint);
+
+			var iframelyAPI = custom_endpoint ? iframely.config.endpoint : iframely['apiBase'] + '&api_key=' + iframely.config.endpoint;
 			iframelyAPI += (iframelyAPI.indexOf('?') > -1 ? '&' : '?') + 'url=' + data.url;
+
+			if (custom_endpoint) {
+				iframelyAPI += '&group=true';
+			}
 
 			request({
 				url: iframelyAPI,
@@ -383,12 +395,17 @@ iframely.query = function(data, callback) {
 				} else {
 					if (res.statusCode === 200 && body) {
 						iframely.cache.set(data.url, body);
-						return callback(null, {
-							match: data.match,
-							embed: body
-						});
+						try {
+							callback(null, {
+								match: data.match,
+								embed: body
+							});
+						} catch(ex) {
+							winston.error('[plugin/iframely] Could not parse embed! ' + ex);
+							callback();
+						}
 					} else {
-						return callback();
+						callback();
 					}
 				}
 			});
@@ -532,9 +549,9 @@ function getViews(views) {
 }
 
 function getDomain(embed) {
-	var domain = embed.meta && embed.meta.site;
+	var domain = embed.meta.site;
 	if (!domain) {
-		var url = embed.meta && embed.meta.canonical || embed.url;
+		var url = embed.meta.canonical;
 		var m = url.match(/(?:https?:\/\/)?(?:www\.)?([^\/]+)/i);
 		if (m) {
 			domain = m[1];
@@ -571,7 +588,7 @@ function getImage(embed) {
 }
 
 function getFilename(embed) {
-	var m = embed.url.match(/([^\/\.]+\.[^\/\.]+)(?:\?.*)?$/);
+	var m = embed.meta.canonical.match(/([^\/\.]+\.[^\/\.]+)(?:\?.*)?$/);
 	if (m) {
 		return m[1];
 	} else {

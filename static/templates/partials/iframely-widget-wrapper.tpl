@@ -1,7 +1,7 @@
 <div class="iframely-link">
 
 	<div>
-		<a href="{embed.url}" target="_blank" rel="nofollow">
+		<a href="{embed.meta.canonical}" target="_blank" rel="nofollow">
 
 			<!-- IF favicon -->
 			<img src="{favicon}" class="thumb pull-left" />
@@ -10,7 +10,7 @@
 			{domain}
 		</a>
 
-		<a href="{embed.url}" class="toggle-embed no-select" data-iframely-embed="{escaped_html}" data-show-label="{show_label}" data-hide-label="{hide_label}" rel="nofollow">{toggle_label}</a>
+		<a href="{embed.meta.canonical}" class="toggle-embed no-select" data-iframely-embed="{escaped_html}" data-show-label="{show_label}" data-hide-label="{hide_label}" rel="nofollow">{toggle_label}</a>
 	</div>
 
 	<!-- IF !widget_html -->
