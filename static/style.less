@@ -1,16 +1,44 @@
-.iframely-embed {
-	.media-object {
-		max-width: 128px;
-	}
-
-	.description {
-		text-overflow: ellipsis;
-		white-space: nowrap;
-		overflow: hidden;
-		width: 400px;
-	}
+.iframely-link {
 
 	.thumb {
-		max-width: 32px;
+		max-width: 21px !important;
+		margin-right: 5px;
+	}
+
+	.toggle-embed::before {
+	  	content: "\2022\0020";
+	}
+
+	.iframely-container {
+
+		margin-top: 15px;
+
+		.panel-iframely {
+
+			max-width: 600px;
+
+			.iframely-embed {
+
+				.one-line {
+					text-overflow: ellipsis;
+					white-space: nowrap;
+					overflow: hidden;
+					display: inline-block;
+					width: 100%;
+				}
+
+				.iframely-meta {
+					margin-bottom: 10px;
+				}
+
+				.media iframe, .media img {
+					max-width: 100%;
+				}
+
+				p.description {
+					margin: 10px 0 0 0;
+				}
+			}
+		}
 	}
 }

@@ -1,41 +1,85 @@
 <form role="form" class="iframely-settings">
 	<div class="row">
-		<div class="col-sm-2 col-xs-12 settings-header">Settings</div>
+		<div class="col-sm-2 col-xs-12 settings-header">API Settings</div>
 		<div class="col-sm-10 col-xs-12">
 			<div class="alert alert-info">
 				<p>
-					If you have your own account with Iframely and with to use your own API key,
-					you may enter it below.
+					Use Iframely as a cloud or self-hosted <a href="https://github.com/itteco/iframely" target="_blank">open-source</a> API.
+				</p>
+				<p>
+					Get API Key <a href="https://iframely.com" target="_blank">API key here</a>.
 				</p>
 			</div>
 			<div class="form-group">
-				<label for="key">API Key</label>
-				<input type="text" id="key" name="key" title="API Key" class="form-control input-lg" placeholder="API Key" />
-			</div>
-			<div class="checkbox">
-				<label for="simple" class="mdl-switch mdl-js-switch mdl-js-ripple-effect">
-					<input type="checkbox" class="mdl-switch__input" id="simple" name="simple" />
-					<span class="mdl-switch__label">Simple Embed</span>
-				</label>
+				<label for="endpoint">API key or address:</label>
+				<input type="text" id="endpoint" name="endpoint" title="API Key" class="form-control input-lg" placeholder="Your API Key or http:// endpoint" />
 			</div>
 		</div>
 	</div>
 
 	<div class="row">
-		<div class="col-sm-2 col-xs-12 settings-header">Domain Blacklist</div>
+		<div class="col-sm-2 col-xs-12 settings-header">Expand/collapse Iframely previews</div>
 		<div class="col-sm-10 col-xs-12">
 			<div class="form-group">
-				<label for="blacklist">Blacklisted Domains</label>
-				<input type="text" id="blacklist" name="blacklist" title="Blacklisted Domains" class="form-control" placeholder="Blacklisted Domains" />
-			</div>
-			<div class="checkbox">
-				<label for="enableBlacklist" class="mdl-switch mdl-js-switch mdl-js-ripple-effect">
-					<input type="checkbox" class="mdl-switch__input" id="enableBlacklist" name="enableBlacklist" />
-					<span class="mdl-switch__label">Enable Blacklist</span>
+				<p>
+					Iframely uses +/- vote to check when to expand URL previews and when to hide it.
+				</p>
+				<p>
+					To always expand unvoted posts, set 0 as a minumum vote.
+				</p>
+				<label for="expandOnVotesCount">
+					Always expand previews when vote is over:
 				</label>
+				<input type="text" id="expandOnVotesCount" name="expandOnVotesCount" class="form-control" placeholder="0" />
 			</div>
 		</div>
 	</div>
+
+	<div class="row">
+		<div class="col-sm-2 col-xs-12 settings-header">Previews for specific domains</div>
+		<div class="col-sm-10 col-xs-12">
+			<div class="form-group">
+				<label for="expandDomains">Always expand previews for these domains:</label>
+				<input type="text" id="expandDomains" name="expandDomains" class="form-control" placeholder="www.domain.com" />
+			</div>
+			<div class="form-group">
+				<label for="collapseDomains">Always collapse previews for these domains:</label>
+				<input type="text" id="collapseDomains" name="collapseDomains" class="form-control" placeholder="www.domain.com" />
+			</div>
+		</div>
+	</div>
+
+	<div class="row">
+		<div class="col-sm-2 col-xs-12 settings-header">Or ignore domains</div>
+		<div class="col-sm-10 col-xs-12">
+			<p>
+				Iframely won't even try to parse URLs from these domains.
+			</p>
+			<div class="form-group">
+				<label for="blacklist">Domains to skip:</label>
+				<input type="text" id="blacklist" name="blacklist" class="form-control" placeholder="www.domain.com" />
+			</div>
+		</div>
+
+	</div>
+
+	<div class="row">
+		<div class="col-sm-2 col-xs-12 settings-header">Image Proxy</div>
+		<div class="col-sm-10 col-xs-12">
+			<div class="form-group">
+				<p>
+					Optional (but recommended) <a href="https://github.com/atmos/camo" target="_blank">Camo</a> server settings to proxy images under SSL and avoid hot-linking.
+				</p>				
+				<label for="endpoint">Camo Proxy Host:</label>
+				<input type="text" id="camoProxyHost" name="camoProxyHost" class="form-control input-lg" placeholder="http://" />
+			</div>
+			<div class="form-group">
+				<label for="endpoint">Camo Hash Key:</label>
+				<input type="text" id="camoProxyKey" name="camoProxyKey" class="form-control input-lg" placeholder="" />
+			</div>
+		</div>
+	</div>
+
 </form>
 
 <button id="save" class="floating-button mdl-button mdl-js-button mdl-button--fab mdl-js-ripple-effect mdl-button--colored">

@@ -7,12 +7,19 @@ define('admin/plugins/iframely', ['settings'], function(Settings) {
 
 	ACP.init = function() {
 		Settings.load('iframely', $('.iframely-settings'), function() {
-			// Tagsinput for domain blacklist control
-			var blacklistInput = $('#blacklist').tagsinput({
-				confirmKeys: [13, 44],
-				trimValue: true
-			});
-			$(blacklistInput[0]['$input']).addClass('form-control').parent().css('display', 'block');
+
+			function tagifyInput(selector) {
+				var input = $(selector).tagsinput({
+					confirmKeys: [13, 44],
+					trimValue: true
+				});
+				$(input[0]['$input']).addClass('form-control').parent().css('display', 'block');
+
+			}
+
+			tagifyInput('#blacklist');
+			tagifyInput('#expandDomains');
+			tagifyInput('#collapseDomains');
 		});
 
 		$('#save').on('click', function() {

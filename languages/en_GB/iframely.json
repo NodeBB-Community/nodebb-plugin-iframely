@@ -1,0 +1,22 @@
+{
+    "view-media":                       "view media",
+    "hide-media":                       "hide media",
+
+    "view-on":                          "view on",
+
+    "view-image":                       "view image",
+    "hide-image":                       "hide image",
+
+    "view-file":                        "view file",
+    "hide-file":                        "hide file",
+
+    "view-it":                          "view it",
+    "hide-it":                          "hide it",
+
+    "view-details":                     "view details",
+    "hide-details":                     "hide details",
+
+    "read-on":                          "read on",
+
+    "visit":                            "visit"
+}
