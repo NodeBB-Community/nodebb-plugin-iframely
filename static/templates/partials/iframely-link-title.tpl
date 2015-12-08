@@ -1,6 +1,6 @@
 <div class="iframely-link">
     <div>
-        <a href="{embed.canonical.meta}" target="_blank" rel="nofollow">
+        <a href="{embed.meta.canonical}" target="_blank" rel="nofollow">
 
             <!-- IF embed.links.icon.length -->
             <!-- BEGIN embed.links.icon -->
