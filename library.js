@@ -227,14 +227,16 @@ iframely.replace = function(raw, options, callback) {
 
 					context.favicon = wrapImage(embed.links.icon && embed.links.icon[0].href);
 
+					context.more_label = false;
+
 					if (embed.rel.indexOf('player') > -1 || embed.rel.indexOf('gifv') > -1) {
 						context.show_label = words['view-media'];
 						context.hide_label = words['hide-media'];
 
 						if (embed.rel.indexOf('gifv') > -1) {
-							context.title = null;
-							context.description = null;
-							context.more_label = null;
+							context.title = false;
+							context.description = false;
+							context.more_label = false;
 						} else {
 							context.more_label = words['view-on'];
 						}
@@ -244,7 +246,7 @@ iframely.replace = function(raw, options, callback) {
 						context.hide_label = words['hide-image'];
 
 						if (embed.rel.indexOf('file') > -1) {
-							context.more_label = null;
+							context.more_label = false;
 						} else {
 							context.more_label = words['view-on'];
 						}
