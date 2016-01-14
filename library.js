@@ -413,6 +413,7 @@ iframely.query = function(data, callback) {
 			});
 		} else {
 			winston.error('[plugin/iframely] No API key or endpoint configured, skipping Iframely');
+			callback();
 		}
 	}
 };
