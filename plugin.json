@@ -13,8 +13,10 @@
 		"static/style.less"
 	],
 	"scripts": [
-		"static/lib/admin.js",
 		"static/lib/show-hide.js"
+	],
+	"acpScripts": [
+		"static/lib/admin.js"
 	],
 	"templates": "static/templates",
   	"languages": "languages",
