@@ -1,6 +1,6 @@
 {
   "name": "nodebb-plugin-iframely",
-  "version": "0.6.0",
+  "version": "0.6.6",
   "description": "Iframely will give you embeds from over 1700 domains, plus previews for the rest of the web.",
   "main": "library.js",
   "repository": {
@@ -16,7 +16,7 @@
     "youtube",
     "gfycat",
     "giphy",
-    "imgur",    
+    "imgur",
     "unfurl",
     "onebox"
   ],
@@ -30,7 +30,7 @@
   },
   "readmeFilename": "README.md",
   "nbbpm": {
-    "compatibility": "^0.6.0 || ^0.7.0 || ^0.8.0"
+    "compatibility": "^1.0.0"
   },
   "dependencies": {
     "lru-cache": "^2.7.0",
