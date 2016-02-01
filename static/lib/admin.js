@@ -18,8 +18,6 @@ define('admin/plugins/iframely', ['settings'], function(Settings) {
 			}
 
 			tagifyInput('#blacklist');
-			tagifyInput('#expandDomains');
-			tagifyInput('#collapseDomains');
 		});
 
 		$('#save').on('click', function() {

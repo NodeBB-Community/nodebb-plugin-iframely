@@ -206,6 +206,9 @@ iframely.replace = function(raw, options, callback) {
 						collapseWidget = false;
 					}
 
+					// TMP: always show.
+					collapseWidget = false;
+
 					// End detect collapsed.
 
 					var context = {};

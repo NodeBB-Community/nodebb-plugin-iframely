@@ -18,33 +18,16 @@
 	</div>
 
 	<div class="row">
-		<div class="col-sm-2 col-xs-12 settings-header">Expand/collapse Iframely previews</div>
+		<div class="col-sm-2 col-xs-12 settings-header">Disable parsing on negative votes</div>
 		<div class="col-sm-10 col-xs-12">
 			<div class="form-group">
 				<p>
-					Iframely uses +/- vote to check when to expand URL previews and when to hide it.
+					Iframely uses +/- vote to check when to parse URL to show previews.
 				</p>
-				<p>
-					To always expand unvoted posts, set 0 as a minumum vote.
-				</p>
-				<label for="expandOnVotesCount">
-					Always expand previews when vote is over:
+				<label for="doNoteParseIfVotesLessThen">
+					And ignore URLs in posts that were down-voted over this number of times:
 				</label>
-				<input type="text" id="expandOnVotesCount" name="expandOnVotesCount" class="form-control" placeholder="0" />
-			</div>
-		</div>
-	</div>
-
-	<div class="row">
-		<div class="col-sm-2 col-xs-12 settings-header">Previews for specific domains</div>
-		<div class="col-sm-10 col-xs-12">
-			<div class="form-group">
-				<label for="expandDomains">Always expand previews for these domains:</label>
-				<input type="text" id="expandDomains" name="expandDomains" class="form-control" placeholder="www.domain.com" />
-			</div>
-			<div class="form-group">
-				<label for="collapseDomains">Always collapse previews for these domains:</label>
-				<input type="text" id="collapseDomains" name="collapseDomains" class="form-control" placeholder="www.domain.com" />
+				<input type="text" id="doNoteParseIfVotesLessThen" name="doNoteParseIfVotesLessThen" class="form-control" placeholder="-10" />
 			</div>
 		</div>
 	</div>
