@@ -167,12 +167,17 @@ iframely.replace = function(raw, options, callback) {
 					var embed = data.embed;
 					var match = data.match;
 
-					if (!embed.html || (embed.rel.indexOf('summary') > -1 && embed.rel.indexOf('app') === -1)) {
-						// Skip summary cards.
+					var hostedSummary = embed.rel.indexOf('summary') > -1 && embed.rel.indexOf('app') === -1;
+					var generateCard = false;
+
+					if (!embed.html) {
 						var image = getImage(embed);
 						if (image) {
+							// Generate own card with thumbnail.
+							generateCard = true;
 							embed.html = '<img src="' + image + '" />';
 						} else {
+							// No embed code. Show link with title only.
 							app.render('partials/iframely-link-title', {embed: embed}, function (err, parsed) {
 
 								if (err) {
@@ -186,7 +191,9 @@ iframely.replace = function(raw, options, callback) {
 						}
 					}
 
-					var context = {};
+					var context = {
+						show_title: false
+					};
 
 					if (embed.rel.indexOf('file') > -1) {
 						context.domain = getFilename(embed);
@@ -207,37 +214,12 @@ iframely.replace = function(raw, options, callback) {
 
 					context.more_label = false;
 
-					if (embed.rel.indexOf('player') > -1 || embed.rel.indexOf('gifv') > -1) {
+					if (context.title && embed.rel.indexOf('player') > -1 && embed.rel.indexOf('gifv') === -1) {
+						context.show_title = true;
+					}
 
-						if (embed.rel.indexOf('gifv') > -1) {
-							context.title = false;
-							context.description = false;
-							context.more_label = false;
-						} else {
-							context.more_label = words['view-on'];
-						}
-
-					} else if (embed.rel.indexOf('image') > -1) {
-
-						if (embed.rel.indexOf('file') > -1) {
-							context.more_label = false;
-						} else {
-							context.more_label = words['view-on'];
-						}
-
-					} else if (embed.rel.indexOf('file') > -1) {
-
-					} else if (embed.rel.indexOf('app') > -1 || embed.rel.indexOf('reader') > -1) {
-
-					} else {
-
-						if (embed.meta.media == 'reader') {
-							// TODO: check usage.
-							context.more_label = words['read-on'];
-						} else if (!embed.html) {
-							// TODO: check usage.
-							context.more_label = words['visit'];
-						}
+					if (generateCard) {
+						context.more_label = words['visit'];
 					}
 
 					// Format meta info.
@@ -299,10 +281,10 @@ iframely.replace = function(raw, options, callback) {
 						});
 					}
 
-					if (embed.rel.indexOf('app') > -1 || embed.rel.indexOf('reader') > -1 || embed.rel.indexOf('survey') > -1) {
-						renderWidgetWrapper(null, embed.html);
-					} else {
+					if (generateCard) {
 						app.render('partials/iframely-widget-card', context, renderWidgetWrapper);
+					} else {
+						renderWidgetWrapper(null, embed.html);
 					}
 
 				}, next);
