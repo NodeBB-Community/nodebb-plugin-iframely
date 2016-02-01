@@ -103,7 +103,17 @@ iframely.replace = function(raw, options, callback) {
 			raw.postData.content = html;
 			return callback(err, raw);
 		});
+
 	} else {
+
+		// Skip parsing post with negative votes.
+		if (options && options.isPost) {
+			var votes = (options && typeof options.votes === 'number') ? options.votes : 0;
+			if (votes < getIntValue(iframely.config.doNoteParseIfVotesLessThen, -10)) {
+				return callback(null, raw);
+			}
+		}
+
 		var urls = [],
 			urlsDict = {},
 			match;
@@ -176,41 +186,6 @@ iframely.replace = function(raw, options, callback) {
 						}
 					}
 
-					// Start detect collapsed/expanded mode.
-
-					var collapseWidget = true;
-					var votes = (options && typeof options.votes === 'number') ? options.votes : 0;
-
-					if (options) {
-						if (votes >= getIntValue(iframely.config.expandOnVotesCount, 0)) {
-							collapseWidget = false;
-						}
-					}
-
-					// Expand small image.
-					if (votes === 0 && (embed.rel.indexOf('file') > -1 && embed.rel.indexOf('image') > -1) || embed.rel.indexOf('gifv') > -1) {
-						var size = embed.links.file && embed.links.file[0].content_length;
-						if (size < 200 * 1024) {
-							collapseWidget = false;
-						}
-					}
-
-					if (alwaysCollapseDomain(embed.meta.canonical)) {
-						collapseWidget = true;
-					} else if (alwaysExpandDomain(embed.meta.canonical)) {
-						collapseWidget = false;
-					}
-
-					if (!options || !options.isPost) {
-						// Expand preview.
-						collapseWidget = false;
-					}
-
-					// TMP: always show.
-					collapseWidget = false;
-
-					// End detect collapsed.
-
 					var context = {};
 
 					if (embed.rel.indexOf('file') > -1) {
@@ -233,8 +208,6 @@ iframely.replace = function(raw, options, callback) {
 					context.more_label = false;
 
 					if (embed.rel.indexOf('player') > -1 || embed.rel.indexOf('gifv') > -1) {
-						context.show_label = words['view-media'];
-						context.hide_label = words['hide-media'];
 
 						if (embed.rel.indexOf('gifv') > -1) {
 							context.title = false;
@@ -245,8 +218,6 @@ iframely.replace = function(raw, options, callback) {
 						}
 
 					} else if (embed.rel.indexOf('image') > -1) {
-						context.show_label = words['view-image'];
-						context.hide_label = words['hide-image'];
 
 						if (embed.rel.indexOf('file') > -1) {
 							context.more_label = false;
@@ -255,16 +226,10 @@ iframely.replace = function(raw, options, callback) {
 						}
 
 					} else if (embed.rel.indexOf('file') > -1) {
-						context.show_label = words['view-file'];
-						context.hide_label = words['hide-file'];
 
 					} else if (embed.rel.indexOf('app') > -1 || embed.rel.indexOf('reader') > -1) {
-						context.show_label = words['view-it'];
-						context.hide_label = words['hide-it'];
 
 					} else {
-						context.show_label = words['view-details'];
-						context.hide_label = words['hide-details'];
 
 						if (embed.meta.media == 'reader') {
 							// TODO: check usage.
@@ -322,15 +287,7 @@ iframely.replace = function(raw, options, callback) {
 							return next(null, html);
 						}
 
-						if (collapseWidget) {
-							context.escaped_html = escapeHtml(embed_widget);
-							context.toggle_label = context.show_label;
-							context.widget_html = '';
-						} else {
-							context.escaped_html = '';
-							context.toggle_label = context.hide_label;
-							context.widget_html = embed_widget;
-						}
+						context.widget_html = embed_widget;
 
 						app.render('partials/iframely-widget-wrapper', context, function (err, parsed) {
 							if (err) {
@@ -423,16 +380,6 @@ iframely.query = function(data, callback) {
 
 function hostInBlacklist(host) {
 	return iframely.config.blacklist && iframely.config.blacklist.indexOf(host) > -1;
-}
-
-function alwaysExpandDomain(urlToCheck) {
-	var parsed = url.parse(urlToCheck);
-	return iframely.config.expandDomains && iframely.config.expandDomains.indexOf(parsed.host) > -1;
-}
-
-function alwaysCollapseDomain(urlToCheck) {
-	var parsed = url.parse(urlToCheck);
-	return iframely.config.collapseDomains && iframely.config.collapseDomains.indexOf(parsed.host) > -1;
 }
 
 function wrapHtmlImages(html) {
