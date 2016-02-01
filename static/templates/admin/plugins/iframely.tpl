@@ -7,11 +7,11 @@
 					Use Iframely as a cloud or self-hosted <a href="https://github.com/itteco/iframely" target="_blank">open-source</a> API.
 				</p>
 				<p>
-					Get API Key <a href="https://iframely.com" target="_blank">API key here</a>.
+					Get cloud <a href="https://iframely.com" target="_blank">API key here</a>.
 				</p>
 			</div>
 			<div class="form-group">
-				<label for="endpoint">API key or address:</label>
+				<label for="endpoint">API key or endpoint address:</label>
 				<input type="text" id="endpoint" name="endpoint" title="API Key" class="form-control input-lg" placeholder="Your API Key or http:// endpoint" />
 			</div>
 		</div>
@@ -25,7 +25,7 @@
 					Iframely uses +/- vote to check when to parse URL to show previews.
 				</p>
 				<label for="doNoteParseIfVotesLessThen">
-					And ignore URLs in posts that were down-voted over this number of times:
+					Ignore URLs when +/- vote gets below this value (-10 by default):
 				</label>
 				<input type="text" id="doNoteParseIfVotesLessThen" name="doNoteParseIfVotesLessThen" class="form-control" placeholder="-10" />
 			</div>
@@ -33,10 +33,10 @@
 	</div>
 
 	<div class="row">
-		<div class="col-sm-2 col-xs-12 settings-header">Or ignore domains</div>
+		<div class="col-sm-2 col-xs-12 settings-header">Or ignore some domains</div>
 		<div class="col-sm-10 col-xs-12">
 			<p>
-				Iframely won't even try to parse URLs from these domains.
+				Iframely won't even try to parse URLs from these domains (e.g. your own domain makes sense here).
 			</p>
 			<div class="form-group">
 				<label for="blacklist">Domains to skip:</label>
