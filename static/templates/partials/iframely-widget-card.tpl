@@ -2,11 +2,11 @@
     <div class="panel-body">
         <div class="media iframely-embed">
 
-            <!-- IF meta -->
+            <!-- IF metaString -->
             <div class="text-muted iframely-meta one-line">
-                {meta}
+                {metaString}
             </div>
-            <!-- ENDIF meta -->
+            <!-- ENDIF metaString -->
 
             <!-- IF title -->
             <h4 class="media-heading">
@@ -14,11 +14,11 @@
             </h4>
             <!-- ENDIF title -->
 
-            <!-- IF embed.html -->
+            <!-- IF embedHtml -->
             <div class="media">
-                {embed.html}
+                {embedHtml}
             </div>
-            <!-- ENDIF embed.html -->
+            <!-- ENDIF embedHtml -->
 
             <!-- IF description -->
             <p class="description">

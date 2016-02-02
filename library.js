@@ -45,8 +45,7 @@ var controllers = require('./lib/controllers'),
 
 iframely.init = function(params, callback) {
 	var router = params.router,
-		hostMiddleware = params.middleware,
-		hostControllers = params.controllers;
+		hostMiddleware = params.middleware;
 
 	app = params.app;
 		
@@ -56,8 +55,6 @@ iframely.init = function(params, callback) {
 	meta.settings.get('iframely', function(err, config) {
 
 		config.blacklist = (config.blacklist && config.blacklist.split(',')) || [];
-		config.expandDomains = (config.expandDomains && config.expandDomains.split(',')) || [];
-		config.collapseDomains = (config.collapseDomains && config.collapseDomains.split(',')) || [];
 
 		iframely.config = config;
 	});
@@ -167,15 +164,16 @@ iframely.replace = function(raw, options, callback) {
 
 					var embed = data.embed;
 					var match = data.match;
+					var embedHtml = embed.html;
 
 					var generateCard = false;
 
-					if (!embed.html) {
+					if (!embedHtml) {
 						var image = getImage(embed);
 						if (image) {
 							// Generate own card with thumbnail.
 							generateCard = true;
-							embed.html = '<img src="' + image + '" />';
+							embedHtml = '<img src="' + image + '" />';
 						} else {
 							// No embed code. Show link with title only.
 							app.render('partials/iframely-link-title', {embed: embed}, function (err, parsed) {
@@ -190,8 +188,6 @@ iframely.replace = function(raw, options, callback) {
 							return;
 						}
 					}
-
-					embed.html = wrapHtmlImages(embed.html);
 
 					// Format meta info.
 					var meta = [];
@@ -235,7 +231,8 @@ iframely.replace = function(raw, options, callback) {
 						favicon: wrapImage(embed.links.icon && embed.links.icon[0].href),
 						more_label: false,
 						embed: embed,
-						meta: meta.join('&nbsp;&nbsp;/&nbsp;&nbsp;')
+						metaString: meta.length ? meta.join('&nbsp;&nbsp;/&nbsp;&nbsp;') : false,
+						embedHtml: wrapHtmlImages(embedHtml)
 					};
 
 					if (context.title && embed.rel.indexOf('player') > -1 && embed.rel.indexOf('gifv') === -1) {
@@ -268,7 +265,7 @@ iframely.replace = function(raw, options, callback) {
 					if (generateCard) {
 						app.render('partials/iframely-widget-card', context, renderWidgetWrapper);
 					} else {
-						renderWidgetWrapper(null, embed.html);
+						renderWidgetWrapper(null, context.embedHtml);
 					}
 
 				}, next);
@@ -504,33 +501,6 @@ function getDate(date) {
 function getImage(embed) {
 	var image = (embed.links.thumbnail && embed.links.thumbnail[0]) || (embed.links.image && embed.links.image[0]);
 	return image && image.href;
-}
-
-function getFilename(embed) {
-	var m = embed.meta.canonical.match(/([^\/\.]+\.[^\/\.]+)(?:\?.*)?$/);
-	if (m) {
-		return m[1];
-	} else {
-		return getDomain(embed);
-	}
-}
-
-function getFilesize(embed) {
-	var content_length = parseInt(embed.links.file[0].content_length);
-	if (!isNaN(content_length)) {
-		if (content_length > 1024*1024) {
-			content_length = Math.round(content_length / (1024 * 1024)) + ' MB';
-		} else {
-			content_length = content_length / 1024;
-			if (content_length < 10) {
-				content_length = content_length.toFixed(1);
-			} else {
-				content_length = Math.round(content_length);
-			}
-			content_length += ' KB'
-		}
-		return content_length;
-	}
 }
 
 module.exports = iframely;
