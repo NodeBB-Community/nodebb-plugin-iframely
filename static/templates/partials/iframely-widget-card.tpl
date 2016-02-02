@@ -10,7 +10,12 @@
 
             <!-- IF title -->
             <h4 class="media-heading">
-                <a href="{embed.url}" target="_blank" rel="nofollow" class="one-line">{title}</a>
+                <a href="{embed.url}" target="_blank" rel="nofollow" class="one-line">
+                    <!-- IF favicon -->
+                    <img src="{favicon}" class="thumb pull-left" />
+                    <!-- ENDIF favicon -->
+                    {title}
+                </a>
             </h4>
             <!-- ENDIF title -->
 
