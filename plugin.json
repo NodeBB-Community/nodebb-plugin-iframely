@@ -12,11 +12,5 @@
 	"less": [
 		"static/style.less"
 	],
-	"scripts": [
-		"static/lib/admin.js",
-		"static/lib/show-hide.js"
-	],
-	"templates": "static/templates",
-  	"languages": "languages",
-  	"defaultLang": "en_GB"
+	"templates": "static/templates"
 }

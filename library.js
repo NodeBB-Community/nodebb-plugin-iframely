@@ -6,47 +6,28 @@ var controllers = require('./lib/controllers'),
 	async = module.parent.require('async'),
 	nconf = module.parent.require('nconf'),
 	winston = module.parent.require('winston'),
-	templates = module.parent.require('templates.js'),
-	translator = require.main.require('./public/src/modules/translator'),
 	meta = require.main.require('./src/meta'),
 
 	postCache = module.parent.require('./posts/cache'),
 	LRU = require('lru-cache'),
 	url = require('url'),
 	moment = require('moment'),
-	escapeHtml = require('escape-html'),
     crypto = require('crypto'),
 
 	iframely = {
 		config: undefined,
-		apiBase: 'https://iframe.ly/api/iframely?origin=nodebb&align=left',
+		apiBase: 'http://iframe.ly/api/iframely?origin=nodebb&align=left',
 		cache: LRU({
 			maxAge: 1000*60*60*24	// one day
 		}),
-		htmlRegex: /<a.+?href="(.+?)".*?>(.*?)<\/a>/g,
-		usedWords: [
-			"view-media",
-			"hide-media",
-			"view-on",
-			"view-image",
-			"hide-image",
-			"view-file",
-			"hide-file",
-			"view-it",
-			"hide-it",
-			"view-details",
-			"hide-details",
-			"read-on",
-			"visit"
-		]
+		htmlRegex: /<a.+?href="(.+?)".*?>(.*?)<\/a>/g
 	},
 	app;
 
 
 iframely.init = function(params, callback) {
 	var router = params.router,
-		hostMiddleware = params.middleware,
-		hostControllers = params.controllers;
+		hostMiddleware = params.middleware;
 
 	app = params.app;
 		
@@ -56,8 +37,6 @@ iframely.init = function(params, callback) {
 	meta.settings.get('iframely', function(err, config) {
 
 		config.blacklist = (config.blacklist && config.blacklist.split(',')) || [];
-		config.expandDomains = (config.expandDomains && config.expandDomains.split(',')) || [];
-		config.collapseDomains = (config.collapseDomains && config.collapseDomains.split(',')) || [];
 
 		iframely.config = config;
 	});
@@ -96,6 +75,7 @@ iframely.replace = function(raw, options, callback) {
 		 *	If a post object is received (`filter:post.parse`),
 		 *	instead of a plain string, call self.
 		 */
+
 		iframely.replace(raw.postData.content, {
 			votes: parseInt(raw.postData.votes),
 			isPost: true
@@ -103,7 +83,17 @@ iframely.replace = function(raw, options, callback) {
 			raw.postData.content = html;
 			return callback(err, raw);
 		});
+
 	} else {
+
+		// Skip parsing post with negative votes.
+		if (options && options.isPost) {
+			var votes = (options && typeof options.votes === 'number') ? options.votes : 0;
+			if (votes < getIntValue(iframely.config.doNoteParseIfVotesLessThen, -10)) {
+				return callback(null, raw);
+			}
+		}
+
 		var urls = [],
 			urlsDict = {},
 			match;
@@ -135,34 +125,27 @@ iframely.replace = function(raw, options, callback) {
 
 		async.waterfall([
 
-			function(cb) {
+			// Query urls from Iframely, in batches of 10
+			async.apply(async.mapLimit, urls, 10, iframely.query),
 
-				async.parallel({
-
-					// Query urls from Iframely, in batches of 10
-					embeds: async.apply(async.mapLimit, urls, 10, iframely.query),
-
-					words: getTranslationsDict
-
-				}, cb);
-			},
-
-			function(data, next) {
-
-				var embeds = data.embeds;
-				var words = data.words;
+			function(embeds, next) {
 
 				async.reduce(embeds.filter(Boolean), raw, function(html, data, next) {
 
 					var embed = data.embed;
 					var match = data.match;
+					var embedHtml = embed.html;
 
-					if (!embed.html || (embed.rel.indexOf('summary') > -1 && embed.rel.indexOf('app') === -1)) {
-						// Skip summary cards.
+					var generateCard = false;
+
+					if (!embedHtml) {
 						var image = getImage(embed);
 						if (image) {
-							embed.html = '<img src="' + image + '" />';
+							// Generate own card with thumbnail.
+							generateCard = true;
+							embedHtml = '<img src="' + image + '" />';
 						} else {
+							// No embed code. Show link with title only.
 							app.render('partials/iframely-link-title', {embed: embed}, function (err, parsed) {
 
 								if (err) {
@@ -176,141 +159,61 @@ iframely.replace = function(raw, options, callback) {
 						}
 					}
 
-					// Start detect collapsed/expanded mode.
-
-					var collapseWidget = true;
-					var votes = (options && typeof options.votes === 'number') ? options.votes : 0;
-
-					if (options) {
-						if (votes >= getIntValue(iframely.config.expandOnVotesCount, 0)) {
-							collapseWidget = false;
-						}
-					}
-
-					// Expand small image.
-					if (votes === 0 && (embed.rel.indexOf('file') > -1 && embed.rel.indexOf('image') > -1) || embed.rel.indexOf('gifv') > -1) {
-						var size = embed.links.file && embed.links.file[0].content_length;
-						if (size < 200 * 1024) {
-							collapseWidget = false;
-						}
-					}
-
-					if (alwaysCollapseDomain(embed.meta.canonical)) {
-						collapseWidget = true;
-					} else if (alwaysExpandDomain(embed.meta.canonical)) {
-						collapseWidget = false;
-					}
-
-					if (!options || !options.isPost) {
-						// Expand preview.
-						collapseWidget = false;
-					}
-
-					// End detect collapsed.
-
-					var context = {};
-
-					if (embed.rel.indexOf('file') > -1) {
-						context.domain = getFilename(embed);
-						if (embed.rel.indexOf('image') > -1) {
-							var size = getFilesize(embed);
-							if (size) {
-								context.domain += ' (' + size + ')';
-							}
-						}
-					} else {
-						context.domain = getDomain(embed);
-					}
-
-					context.title = shortenText(embed.meta.title, 200);
-					context.description = shortenText(embed.meta.description, 300);
-
-					context.favicon = wrapImage(embed.links.icon && embed.links.icon[0].href);
-
-					context.more_label = false;
-
-					if (embed.rel.indexOf('player') > -1 || embed.rel.indexOf('gifv') > -1) {
-						context.show_label = words['view-media'];
-						context.hide_label = words['hide-media'];
-
-						if (embed.rel.indexOf('gifv') > -1) {
-							context.title = false;
-							context.description = false;
-							context.more_label = false;
-						} else {
-							context.more_label = words['view-on'];
-						}
-
-					} else if (embed.rel.indexOf('image') > -1) {
-						context.show_label = words['view-image'];
-						context.hide_label = words['hide-image'];
-
-						if (embed.rel.indexOf('file') > -1) {
-							context.more_label = false;
-						} else {
-							context.more_label = words['view-on'];
-						}
-
-					} else if (embed.rel.indexOf('file') > -1) {
-						context.show_label = words['view-file'];
-						context.hide_label = words['hide-file'];
-
-					} else if (embed.rel.indexOf('app') > -1 || embed.rel.indexOf('reader') > -1) {
-						context.show_label = words['view-it'];
-						context.hide_label = words['hide-it'];
-
-					} else {
-						context.show_label = words['view-details'];
-						context.hide_label = words['hide-details'];
-
-						if (embed.meta.media == 'reader') {
-							// TODO: check usage.
-							context.more_label = words['read-on'];
-						} else if (!embed.html) {
-							// TODO: check usage.
-							context.more_label = words['visit'];
-						}
-					}
-
 					// Format meta info.
 					var meta = [];
 
-					if (embed.meta.author) {
-						meta.push(embed.meta.author);
-					}
+					if (generateCard) {
+						if (embed.meta.author) {
+							meta.push(embed.meta.author);
+						}
 
-					var date = getDate(embed.meta.date);
-					if (date) {
-						meta.push(date);
-					}
+						var date = getDate(embed.meta.date);
+						if (date) {
+							meta.push(date);
+						}
 
-					var currency = embed.meta.currency_code || embed.meta.currency;
-					var price = embed.meta.price ? (embed.meta.price + (currency ? (' ' + currency) : '')) : null;
-					if (price) {
-						meta.push(price);
-					}
+						var currency = embed.meta.currency_code || embed.meta.currency;
+						var price = embed.meta.price ? (embed.meta.price + (currency ? (' ' + currency) : '')) : null;
+						if (price) {
+							meta.push(price);
+						}
 
-					var duration = getDuration(embed.meta.duration);
-					if (duration) {
-						meta.push(duration);
-					}
+						var duration = getDuration(embed.meta.duration);
+						if (duration) {
+							meta.push(duration);
+						}
 
-					var views = getViews(embed.meta.views);
-					if (views) {
-						meta.push(views);
-					}
+						var views = getViews(embed.meta.views);
+						if (views) {
+							meta.push(views);
+						}
 
-					if (embed.meta.category) {
-						meta.push(embed.meta.category);
+						if (embed.meta.category) {
+							meta.push(embed.meta.category);
+						}
 					}
-
-					context.meta = meta.join('&nbsp;&nbsp;/&nbsp;&nbsp;');
 
 					// END Format meta info.
 
-					embed.html = wrapHtmlImages(embed.html);
+					var context = {
+						show_title: false,
+						domain: getDomain(embed),
+						title: shortenText(embed.meta.title, 200),
+						description: shortenText(embed.meta.description, 300),
+						favicon: wrapImage(embed.links.icon && embed.links.icon[0].href) || false,
+						embed: embed,
+						metaString: meta.length ? meta.join('&nbsp;&nbsp;/&nbsp;&nbsp;') : false,
+						embedHtml: wrapHtmlImages(embedHtml)
+					};
 
-					context.embed = embed;
+					if (context.title && embed.rel.indexOf('player') > -1 && embed.rel.indexOf('gifv') === -1) {
+						context.show_title = true;
+					}
+
+					if (embed.rel.indexOf('file') > -1 && embed.rel.indexOf('reader') > -1) {
+						context.title = embed.meta.canonical;
+						context.show_title = true;
+					}
 
 					function renderWidgetWrapper(err, embed_widget) {
 
@@ -319,15 +222,7 @@ iframely.replace = function(raw, options, callback) {
 							return next(null, html);
 						}
 
-						if (collapseWidget) {
-							context.escaped_html = escapeHtml(embed_widget);
-							context.toggle_label = context.show_label;
-							context.widget_html = '';
-						} else {
-							context.escaped_html = '';
-							context.toggle_label = context.hide_label;
-							context.widget_html = embed_widget;
-						}
+						context.widget_html = embed_widget;
 
 						app.render('partials/iframely-widget-wrapper', context, function (err, parsed) {
 							if (err) {
@@ -339,10 +234,10 @@ iframely.replace = function(raw, options, callback) {
 						});
 					}
 
-					if (embed.rel.indexOf('app') > -1 || embed.rel.indexOf('reader') > -1 || embed.rel.indexOf('survey') > -1) {
-						renderWidgetWrapper(null, embed.html);
-					} else {
+					if (generateCard) {
 						app.render('partials/iframely-widget-card', context, renderWidgetWrapper);
+					} else {
+						renderWidgetWrapper(null, context.embedHtml);
 					}
 
 				}, next);
@@ -413,22 +308,13 @@ iframely.query = function(data, callback) {
 			});
 		} else {
 			winston.error('[plugin/iframely] No API key or endpoint configured, skipping Iframely');
+			callback();
 		}
 	}
 };
 
 function hostInBlacklist(host) {
 	return iframely.config.blacklist && iframely.config.blacklist.indexOf(host) > -1;
-}
-
-function alwaysExpandDomain(urlToCheck) {
-	var parsed = url.parse(urlToCheck);
-	return iframely.config.expandDomains && iframely.config.expandDomains.indexOf(parsed.host) > -1;
-}
-
-function alwaysCollapseDomain(urlToCheck) {
-	var parsed = url.parse(urlToCheck);
-	return iframely.config.collapseDomains && iframely.config.collapseDomains.indexOf(parsed.host) > -1;
 }
 
 function wrapHtmlImages(html) {
@@ -463,18 +349,6 @@ function wrapImage(url) {
 	} else {
 		return url;
 	}
-}
-
-function getTranslationsDict(cb) {
-	var dict = {};
-	async.each(iframely.usedWords, function(word, cb) {
-		translator.translate('[[iframely:' + word + ']]', function(translated) {
-			dict[word] = translated;
-			cb();
-		});
-	}, function(error) {
-		cb(error, dict);
-	});
 }
 
 function getIntValue(value, defaultValue) {
@@ -587,33 +461,6 @@ function getDate(date) {
 function getImage(embed) {
 	var image = (embed.links.thumbnail && embed.links.thumbnail[0]) || (embed.links.image && embed.links.image[0]);
 	return image && image.href;
-}
-
-function getFilename(embed) {
-	var m = embed.meta.canonical.match(/([^\/\.]+\.[^\/\.]+)(?:\?.*)?$/);
-	if (m) {
-		return m[1];
-	} else {
-		return getDomain(embed);
-	}
-}
-
-function getFilesize(embed) {
-	var content_length = parseInt(embed.links.file[0].content_length);
-	if (!isNaN(content_length)) {
-		if (content_length > 1024*1024) {
-			content_length = Math.round(content_length / (1024 * 1024)) + ' MB';
-		} else {
-			content_length = content_length / 1024;
-			if (content_length < 10) {
-				content_length = content_length.toFixed(1);
-			} else {
-				content_length = Math.round(content_length);
-			}
-			content_length += ' KB'
-		}
-		return content_length;
-	}
 }
 
 module.exports = iframely;
