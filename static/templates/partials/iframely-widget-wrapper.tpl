@@ -1,5 +1,6 @@
 <div class="iframely-link">
 
+	<!-- IF show_title -->
 	<div>
 		<a href="{embed.meta.canonical}" target="_blank" rel="nofollow">
 
@@ -7,18 +8,12 @@
 			<img src="{favicon}" class="thumb pull-left" />
 			<!-- ENDIF favicon -->
 
-			{domain}
+			{title}
 		</a>
-
-		<a href="{embed.meta.canonical}" class="toggle-embed no-select" data-iframely-embed="{escaped_html}" data-show-label="{show_label}" data-hide-label="{hide_label}" rel="nofollow">{toggle_label}</a>
 	</div>
+	<!-- ENDIF show_title -->
 
-	<!-- IF !widget_html -->
-	<div class="iframely-container" style="display: none;"></div>
-	<!-- ENDIF !widget_html -->
-	<!-- IF widget_html -->
 	<div class="iframely-container">
 		{widget_html}
 	</div>
-	<!-- ENDIF widget_html -->
 </div>

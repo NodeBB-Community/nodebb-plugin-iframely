@@ -12,13 +12,5 @@
 	"less": [
 		"static/style.less"
 	],
-	"scripts": [
-		"static/lib/show-hide.js"
-	],
-	"acpScripts": [
-		"static/lib/admin.js"
-	],
-	"templates": "static/templates",
-  	"languages": "languages",
-  	"defaultLang": "en_GB"
+	"templates": "static/templates"
 }

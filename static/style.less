@@ -5,17 +5,17 @@
 		margin-right: 5px;
 	}
 
-	.toggle-embed::before {
-	  	content: "\2022\0020";
-	}
-
 	.iframely-container {
 
 		margin-top: 15px;
 
-		.panel-iframely {
+		max-width: 600px;
 
-			max-width: 600px;
+		img, iframe {
+			max-width: 100% !important;
+		}
+
+		.panel-iframely {
 
 			.iframely-embed {
 
