@@ -96,6 +96,7 @@ iframely.replace = function(raw, options, callback) {
 		 *	If a post object is received (`filter:post.parse`),
 		 *	instead of a plain string, call self.
 		 */
+
 		iframely.replace(raw.postData.content, {
 			votes: parseInt(raw.postData.votes),
 			isPost: true
@@ -167,7 +168,6 @@ iframely.replace = function(raw, options, callback) {
 					var embed = data.embed;
 					var match = data.match;
 
-					var hostedSummary = embed.rel.indexOf('summary') > -1 && embed.rel.indexOf('app') === -1;
 					var generateCard = false;
 
 					if (!embed.html) {
@@ -191,36 +191,7 @@ iframely.replace = function(raw, options, callback) {
 						}
 					}
 
-					var context = {
-						show_title: false
-					};
-
-					if (embed.rel.indexOf('file') > -1) {
-						context.domain = getFilename(embed);
-						if (embed.rel.indexOf('image') > -1) {
-							var size = getFilesize(embed);
-							if (size) {
-								context.domain += ' (' + size + ')';
-							}
-						}
-					} else {
-						context.domain = getDomain(embed);
-					}
-
-					context.title = shortenText(embed.meta.title, 200);
-					context.description = shortenText(embed.meta.description, 300);
-
-					context.favicon = wrapImage(embed.links.icon && embed.links.icon[0].href);
-
-					context.more_label = false;
-
-					if (context.title && embed.rel.indexOf('player') > -1 && embed.rel.indexOf('gifv') === -1) {
-						context.show_title = true;
-					}
-
-					if (generateCard) {
-						context.more_label = words['visit'];
-					}
+					embed.html = wrapHtmlImages(embed.html);
 
 					// Format meta info.
 					var meta = [];
@@ -254,13 +225,26 @@ iframely.replace = function(raw, options, callback) {
 						meta.push(embed.meta.category);
 					}
 
-					context.meta = meta.join('&nbsp;&nbsp;/&nbsp;&nbsp;');
-
 					// END Format meta info.
 
-					embed.html = wrapHtmlImages(embed.html);
+					var context = {
+						show_title: false,
+						domain: getDomain(embed),
+						title: shortenText(embed.meta.title, 200),
+						description: shortenText(embed.meta.description, 300),
+						favicon: wrapImage(embed.links.icon && embed.links.icon[0].href),
+						more_label: false,
+						embed: embed,
+						meta: meta.join('&nbsp;&nbsp;/&nbsp;&nbsp;')
+					};
 
-					context.embed = embed;
+					if (context.title && embed.rel.indexOf('player') > -1 && embed.rel.indexOf('gifv') === -1) {
+						context.show_title = true;
+					}
+
+					if (generateCard) {
+						context.more_label = words['visit'];
+					}
 
 					function renderWidgetWrapper(err, embed_widget) {
 
