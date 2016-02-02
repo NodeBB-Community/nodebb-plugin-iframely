@@ -162,33 +162,35 @@ iframely.replace = function(raw, options, callback) {
 					// Format meta info.
 					var meta = [];
 
-					if (embed.meta.author) {
-						meta.push(embed.meta.author);
-					}
+					if (generateCard) {
+						if (embed.meta.author) {
+							meta.push(embed.meta.author);
+						}
 
-					var date = getDate(embed.meta.date);
-					if (date) {
-						meta.push(date);
-					}
+						var date = getDate(embed.meta.date);
+						if (date) {
+							meta.push(date);
+						}
 
-					var currency = embed.meta.currency_code || embed.meta.currency;
-					var price = embed.meta.price ? (embed.meta.price + (currency ? (' ' + currency) : '')) : null;
-					if (price) {
-						meta.push(price);
-					}
+						var currency = embed.meta.currency_code || embed.meta.currency;
+						var price = embed.meta.price ? (embed.meta.price + (currency ? (' ' + currency) : '')) : null;
+						if (price) {
+							meta.push(price);
+						}
 
-					var duration = getDuration(embed.meta.duration);
-					if (duration) {
-						meta.push(duration);
-					}
+						var duration = getDuration(embed.meta.duration);
+						if (duration) {
+							meta.push(duration);
+						}
 
-					var views = getViews(embed.meta.views);
-					if (views) {
-						meta.push(views);
-					}
+						var views = getViews(embed.meta.views);
+						if (views) {
+							meta.push(views);
+						}
 
-					if (embed.meta.category) {
-						meta.push(embed.meta.category);
+						if (embed.meta.category) {
+							meta.push(embed.meta.category);
+						}
 					}
 
 					// END Format meta info.
