@@ -198,13 +198,18 @@ iframely.replace = function(raw, options, callback) {
 						domain: getDomain(embed),
 						title: shortenText(embed.meta.title, 200),
 						description: shortenText(embed.meta.description, 300),
-						favicon: wrapImage(embed.links.icon && embed.links.icon[0].href),
+						favicon: wrapImage(embed.links.icon && embed.links.icon[0].href) || false,
 						embed: embed,
 						metaString: meta.length ? meta.join('&nbsp;&nbsp;/&nbsp;&nbsp;') : false,
 						embedHtml: wrapHtmlImages(embedHtml)
 					};
 
 					if (context.title && embed.rel.indexOf('player') > -1 && embed.rel.indexOf('gifv') === -1) {
+						context.show_title = true;
+					}
+
+					if (embed.rel.indexOf('file') > -1 && embed.rel.indexOf('reader') > -1) {
+						context.title = embed.meta.canonical;
 						context.show_title = true;
 					}
 
