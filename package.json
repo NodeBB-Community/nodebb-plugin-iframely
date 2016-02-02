@@ -34,7 +34,6 @@
   },
   "dependencies": {
     "lru-cache": "^2.7.0",
-    "escape-html": "1.0.2",
     "moment": "2.10.*"
   }
 }

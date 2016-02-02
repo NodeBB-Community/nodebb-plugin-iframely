@@ -30,13 +30,6 @@
                 {description}
             </p>
             <!-- ENDIF description -->
-
-            <!-- IF more_label -->
-            <p class="description">
-                <a href="{embed.meta.canonical}" target="_blank" rel="nofollow">{more_label} {domain}</a>
-            </p>
-            <!-- ENDIF more_label -->
-
         </div>
     </div>
 </div>

@@ -6,39 +6,21 @@ var controllers = require('./lib/controllers'),
 	async = module.parent.require('async'),
 	nconf = module.parent.require('nconf'),
 	winston = module.parent.require('winston'),
-	templates = module.parent.require('templates.js'),
-	translator = require.main.require('./public/src/modules/translator'),
 	meta = require.main.require('./src/meta'),
 
 	postCache = module.parent.require('./posts/cache'),
 	LRU = require('lru-cache'),
 	url = require('url'),
 	moment = require('moment'),
-	escapeHtml = require('escape-html'),
     crypto = require('crypto'),
 
 	iframely = {
 		config: undefined,
-		apiBase: 'https://iframe.ly/api/iframely?origin=nodebb&align=left',
+		apiBase: 'http://iframe.ly/api/iframely?origin=nodebb&align=left',
 		cache: LRU({
 			maxAge: 1000*60*60*24	// one day
 		}),
-		htmlRegex: /<a.+?href="(.+?)".*?>(.*?)<\/a>/g,
-		usedWords: [
-			"view-media",
-			"hide-media",
-			"view-on",
-			"view-image",
-			"hide-image",
-			"view-file",
-			"hide-file",
-			"view-it",
-			"hide-it",
-			"view-details",
-			"hide-details",
-			"read-on",
-			"visit"
-		]
+		htmlRegex: /<a.+?href="(.+?)".*?>(.*?)<\/a>/g
 	},
 	app;
 
@@ -143,22 +125,10 @@ iframely.replace = function(raw, options, callback) {
 
 		async.waterfall([
 
-			function(cb) {
+			// Query urls from Iframely, in batches of 10
+			async.apply(async.mapLimit, urls, 10, iframely.query),
 
-				async.parallel({
-
-					// Query urls from Iframely, in batches of 10
-					embeds: async.apply(async.mapLimit, urls, 10, iframely.query),
-
-					words: getTranslationsDict
-
-				}, cb);
-			},
-
-			function(data, next) {
-
-				var embeds = data.embeds;
-				var words = data.words;
+			function(embeds, next) {
 
 				async.reduce(embeds.filter(Boolean), raw, function(html, data, next) {
 
@@ -229,7 +199,6 @@ iframely.replace = function(raw, options, callback) {
 						title: shortenText(embed.meta.title, 200),
 						description: shortenText(embed.meta.description, 300),
 						favicon: wrapImage(embed.links.icon && embed.links.icon[0].href),
-						more_label: false,
 						embed: embed,
 						metaString: meta.length ? meta.join('&nbsp;&nbsp;/&nbsp;&nbsp;') : false,
 						embedHtml: wrapHtmlImages(embedHtml)
@@ -237,10 +206,6 @@ iframely.replace = function(raw, options, callback) {
 
 					if (context.title && embed.rel.indexOf('player') > -1 && embed.rel.indexOf('gifv') === -1) {
 						context.show_title = true;
-					}
-
-					if (generateCard) {
-						context.more_label = words['visit'];
 					}
 
 					function renderWidgetWrapper(err, embed_widget) {
@@ -377,18 +342,6 @@ function wrapImage(url) {
 	} else {
 		return url;
 	}
-}
-
-function getTranslationsDict(cb) {
-	var dict = {};
-	async.each(iframely.usedWords, function(word, cb) {
-		translator.translate('[[iframely:' + word + ']]', function(translated) {
-			dict[word] = translated;
-			cb();
-		});
-	}, function(error) {
-		cb(error, dict);
-	});
 }
 
 function getIntValue(value, defaultValue) {
