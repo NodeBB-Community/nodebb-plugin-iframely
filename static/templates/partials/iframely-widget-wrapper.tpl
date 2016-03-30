@@ -5,7 +5,7 @@
 		<a href="{embed.meta.canonical}" target="_blank" rel="nofollow">
 
 			<!-- IF favicon -->
-			<img src="{favicon}" class="thumb pull-left" />
+			<img src="{favicon}" class="thumb pull-left not-responsive" />
 			<!-- ENDIF favicon -->
 
 			{title}
