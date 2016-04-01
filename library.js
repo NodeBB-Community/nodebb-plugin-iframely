@@ -276,7 +276,7 @@ iframely.query = function(data, callback) {
 			var custom_endpoint = /^https?:\/\//i.test(iframely.config.endpoint);
 
 			var iframelyAPI = custom_endpoint ? iframely.config.endpoint : iframely['apiBase'] + '&api_key=' + iframely.config.endpoint;
-			iframelyAPI += (iframelyAPI.indexOf('?') > -1 ? '&' : '?') + 'url=' + data.url;
+			iframelyAPI += (iframelyAPI.indexOf('?') > -1 ? '&' : '?') + 'url=' + encodeURIComponent(data.url);
 
 			if (custom_endpoint) {
 				iframelyAPI += '&group=true';
