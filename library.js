@@ -1,29 +1,29 @@
 "use strict";
 
-var controllers = require('./lib/controllers'),
-	meta = module.parent.require('./meta'),
-	request = module.parent.require('request'),
-	async = module.parent.require('async'),
-	nconf = module.parent.require('nconf'),
-	winston = module.parent.require('winston'),
-	meta = require.main.require('./src/meta'),
+var controllers = require('./lib/controllers');
+var meta = module.parent.require('./meta');
+var request = module.parent.require('request');
+var async = module.parent.require('async');
+var nconf = module.parent.require('nconf');
+var winston = module.parent.require('winston');
+var validator = module.parent.require('validator');
+var meta = require.main.require('./src/meta');
 
-	postCache = module.parent.require('./posts/cache'),
-	LRU = require('lru-cache'),
-	url = require('url'),
-	moment = require('moment'),
-    crypto = require('crypto'),
+var postCache = module.parent.require('./posts/cache');
+var LRU = require('lru-cache');
+var url = require('url');
+var moment = require('moment');
+var crypto = require('crypto');
 
-	iframely = {
-		config: undefined,
-		apiBase: 'http://iframe.ly/api/iframely?origin=nodebb&align=left',
-		cache: LRU({
-			maxAge: 1000*60*60*24	// one day
-		}),
-		htmlRegex: /<a.+?href="(.+?)".*?>(.*?)<\/a>/g
-	},
-	app;
-
+var iframely = {
+	config: undefined,
+	apiBase: 'http://iframe.ly/api/iframely?origin=nodebb&align=left',
+	cache: LRU({
+		maxAge: 1000*60*60*24	// one day
+	}),
+	htmlRegex: /<a.+?href="(.+?)".*?>(.*?)<\/a>/g
+};
+var app;
 
 iframely.init = function(params, callback) {
 	var router = params.router,
@@ -198,8 +198,8 @@ iframely.replace = function(raw, options, callback) {
 					var context = {
 						show_title: false,
 						domain: getDomain(embed),
-						title: shortenText(embed.meta.title, 200),
-						description: shortenText(embed.meta.description, 300),
+						title: validator.escape(shortenText(embed.meta.title, 200)),
+						description: validator.escape(shortenText(embed.meta.description, 300)),
 						favicon: wrapImage(embed.links.icon && embed.links.icon[0].href) || false,
 						embed: embed,
 						metaString: meta.length ? meta.join('&nbsp;&nbsp;/&nbsp;&nbsp;') : false,
