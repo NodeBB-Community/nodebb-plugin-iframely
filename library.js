@@ -134,6 +134,7 @@ iframely.replace = function(raw, options, callback) {
 
 					var embed = data.embed;
 					var match = data.match;
+					var url = data.url;
 					var embedHtml = embed.html;
 
 					var generateCard = false;
@@ -146,7 +147,7 @@ iframely.replace = function(raw, options, callback) {
 							embedHtml = '<img src="' + image + '" />';
 						} else {
 							// No embed code. Show link with title only.
-							app.render('partials/iframely-link-title', {embed: embed}, function (err, parsed) {
+							app.render('partials/iframely-link-title', {embed: embed, url: url}, function (err, parsed) {
 
 								if (err) {
 									winston.error('[plugin/iframely] Could not parse embed: ' + err.message);
@@ -202,6 +203,7 @@ iframely.replace = function(raw, options, callback) {
 						description: validator.escape(shortenText(embed.meta.description, 300)),
 						favicon: wrapImage(embed.links.icon && embed.links.icon[0].href) || false,
 						embed: embed,
+						url: url,
 						metaString: meta.length ? meta.join('&nbsp;&nbsp;/&nbsp;&nbsp;') : false,
 						embedHtml: wrapHtmlImages(embedHtml)
 					};
@@ -260,6 +262,7 @@ iframely.query = function(data, callback) {
 		setImmediate(function() {
 			try {
 				callback(null, {
+					url: data.url,
 					match: data.match,
 					embed: iframely.cache.get(data.url)
 				});
@@ -276,7 +279,7 @@ iframely.query = function(data, callback) {
 			var custom_endpoint = /^https?:\/\//i.test(iframely.config.endpoint);
 
 			var iframelyAPI = custom_endpoint ? iframely.config.endpoint : iframely['apiBase'] + '&api_key=' + iframely.config.endpoint;
-			iframelyAPI += (iframelyAPI.indexOf('?') > -1 ? '&' : '?') + 'url=' + data.url;
+			iframelyAPI += (iframelyAPI.indexOf('?') > -1 ? '&' : '?') + 'url=' + encodeURIComponent(data.url);
 
 			if (custom_endpoint) {
 				iframelyAPI += '&group=true';
@@ -294,6 +297,7 @@ iframely.query = function(data, callback) {
 						iframely.cache.set(data.url, body);
 						try {
 							callback(null, {
+								url: data.url,
 								match: data.match,
 								embed: body
 							});
