@@ -148,7 +148,7 @@ iframely.replace = function(raw, options, callback) {
 						} else {
 							// No embed code. Show link with title only.
 							app.render('partials/iframely-link-title', {
-								title: embed.meta.title || url
+								title: embed.meta.title || url,
 								embed: embed,
 								url: url
 							}, function (err, parsed) {
