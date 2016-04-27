@@ -147,7 +147,11 @@ iframely.replace = function(raw, options, callback) {
 							embedHtml = '<img src="' + image + '" />';
 						} else {
 							// No embed code. Show link with title only.
-							app.render('partials/iframely-link-title', {embed: embed, url: url}, function (err, parsed) {
+							app.render('partials/iframely-link-title', {
+								title: embed.meta.title || url
+								embed: embed,
+								url: url
+							}, function (err, parsed) {
 
 								if (err) {
 									winston.error('[plugin/iframely] Could not parse embed: ' + err.message);

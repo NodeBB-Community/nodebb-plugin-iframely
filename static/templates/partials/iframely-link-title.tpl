@@ -10,7 +10,7 @@
             <!-- END embed.links.icon -->
             <!-- ENDIF embed.links.icon.length -->
 
-            {embed.meta.title}
+            {title}
         </a>
     </div>
 </div>
