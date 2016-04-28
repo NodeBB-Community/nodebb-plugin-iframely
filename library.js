@@ -146,10 +146,14 @@ iframely.replace = function(raw, options, callback) {
 							generateCard = true;
 							embedHtml = '<img src="' + image + '" />';
 						} else {
+
+							var icon = (embed.links.icon && embed.links.icon.length && embed.links.icon[0].href) || false;
+
 							// No embed code. Show link with title only.
 							app.render('partials/iframely-link-title', {
 								title: embed.meta.title || url,
 								embed: embed,
+								icon: icon,
 								url: url
 							}, function (err, parsed) {
 
