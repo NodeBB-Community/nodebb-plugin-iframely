@@ -21,7 +21,7 @@ var iframely = {
 	cache: LRU({
 		maxAge: 1000*60*60*24	// one day
 	}),
-	htmlRegex: /<a.+?href="(.+?)".*?>(.*?)<\/a>/g
+	htmlRegex: /(?:<p>|^)<a.+?href="(.+?)".*?>(.*?)<\/a>(?:<br\/?>|<\/p>)/g
 };
 var app;
 
