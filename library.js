@@ -94,9 +94,9 @@ iframely.replace = function(raw, options, callback) {
 			}
 		}
 
-		var urls = [],
-			urlsDict = {},
-			match;
+		var urls = [];
+		var urlsDict = {};
+		var match;
 
 		// Isolate matches
 		while(match = iframely.htmlRegex.exec(raw)) {
@@ -114,7 +114,8 @@ iframely.replace = function(raw, options, callback) {
 				var uri = match[1];
 
 				// Eliminate duplicates and internal links
-				if (!(uri in urlsDict) && uri.indexOf(nconf.get('url')) !== 0) {
+				if (!(uri in urlsDict) && !isInternalLink(target)) {
+					urlsDict[uri] = true;
 					urls.push({
 						match: match[0],
 						url: uri
@@ -473,6 +474,19 @@ function getDate(date) {
 function getImage(embed) {
 	var image = (embed.links.thumbnail && embed.links.thumbnail[0]) || (embed.links.image && embed.links.image[0]);
 	return image && image.href;
+}
+
+var forumURL = url.parse(nconf.get('url'));
+var uploadsURL = url.parse(url.resolve(nconf.get('url'), nconf.get('upload_url')));
+
+function isInternalLink(target) {
+	if (target.host !== forumURL.host || target.path.indexOf(forumURL.path) !== 0) {
+		return false;
+	}
+	if (target.host !== uploadsURL.host || target.path.indexOf(uploadsURL.path) !== 0) {
+		return true;
+	}
+	return false;
 }
 
 module.exports = iframely;
