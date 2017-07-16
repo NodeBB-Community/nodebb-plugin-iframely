@@ -101,8 +101,13 @@ iframely.replace = function(raw, options, callback) {
 		// Isolate matches
 		while(match = iframely.htmlRegex.exec(raw)) {
 			// Only match if it is a naked link (no anchor text)
-
-			var target = url.parse(match[1]);
+                        
+			var target;
+			try {
+				target = url.parse(match[1]);
+			} catch (err) {
+				target = '';
+			}
 
 			if ((
 				(match[1] === match[2]) ||
