@@ -146,14 +146,13 @@ iframely.replace = function(raw, options, callback) {
 					var url = data.url;
 					var embedHtml = embed.html;
 
-					var generateCard = false;
+					var generateCardWithImage = false;
 
 					if (!embedHtml) {
 						var image = getImage(embed);
 						if (image) {
 							// Generate own card with thumbnail.
-							generateCard = true;
-							embedHtml = '<img src="' + image + '" />';
+							generateCardWithImage = image;
 						} else {
 
 							var icon = (embed.links.icon && embed.links.icon.length && embed.links.icon[0].href) || false;
@@ -180,7 +179,7 @@ iframely.replace = function(raw, options, callback) {
 					// Format meta info.
 					var meta = [];
 
-					if (generateCard) {
+					if (generateCardWithImage) {
 						if (embed.meta.author) {
 							meta.push(embed.meta.author);
 						}
@@ -222,7 +221,7 @@ iframely.replace = function(raw, options, callback) {
 						embed: embed,
 						url: url,
 						metaString: meta.length ? meta.join('&nbsp;&nbsp;/&nbsp;&nbsp;') : false,
-						embedHtml: wrapHtmlImages(embedHtml)
+						image: generateCardWithImage
 					};
 
 					if (context.title && embed.rel.indexOf('player') > -1 && embed.rel.indexOf('gifv') === -1) {
@@ -253,7 +252,7 @@ iframely.replace = function(raw, options, callback) {
 						});
 					}
 
-					if (generateCard) {
+					if (generateCardWithImage) {
 						app.render('partials/iframely-widget-card', context, renderWidgetWrapper);
 					} else {
 						renderWidgetWrapper(null, context.embedHtml);

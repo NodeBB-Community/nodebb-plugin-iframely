@@ -19,11 +19,13 @@
             </h4>
             <!-- ENDIF title -->
 
-            <!-- IF embedHtml -->
+            <!-- IF image -->
             <div class="media">
-                {embedHtml}
+                <a href="{url}" target="_blank" rel="nofollow">
+                    <img src="{image}" alt="{title}" />
+                </a>
             </div>
-            <!-- ENDIF embedHtml -->
+            <!-- ENDIF image -->
 
             <!-- IF description -->
             <p class="description">
