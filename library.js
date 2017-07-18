@@ -15,7 +15,8 @@ var url = require('url');
 var moment = require('moment');
 var crypto = require('crypto');
 
-var DEFAULT_CACHE_MAXAGE = 1000*60*60*24;	// one day
+var ONE_DAY_MS = 1000*60*60*24;
+var DEFAULT_CACHE_MAX_AGE_DAYS = 1;
 
 var iframely = {
 	config: undefined,
@@ -39,8 +40,10 @@ iframely.init = function(params, callback) {
 
 		iframely.config = config;
 
+		var cacheMaxAgeDays = getIntValue(config.cacheMaxAgeDays, DEFAULT_CACHE_MAX_AGE_DAYS);
+
 		iframely.cache= LRU({
-			maxAge: getIntValue(config.cacheMaxAge, DEFAULT_CACHE_MAXAGE)
+			maxAge: cacheMaxAgeDays * ONE_DAY_MS
 		});
 
 		callback();

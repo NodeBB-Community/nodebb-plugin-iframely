@@ -15,8 +15,8 @@
 				<input type="text" id="endpoint" name="endpoint" title="API Key" class="form-control input-lg" placeholder="Your API Key or http:// endpoint" />
 			</div>
 			<div class="form-group">
-				<label for="endpoint">Response cache TTL, ms:</label>
-				<input type="text" id="cacheMaxAge" name="cacheMaxAge" title="Response cache TTL" class="form-control input-lg" placeholder="Response cache TTL in ms, e.g. 604800000 is one week" />
+				<label for="endpoint">Cache Time-To-Live, days:</label>
+				<input type="text" id="cacheMaxAgeDays" name="cacheMaxAgeDays" title="Cache Time-To-Live, days" class="form-control input-lg" placeholder="Number of days to keep Iframely API data in memory cache, default 1 day" />
 			</div>
 		</div>
 	</div>
