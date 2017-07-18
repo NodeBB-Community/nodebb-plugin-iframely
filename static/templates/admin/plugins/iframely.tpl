@@ -14,6 +14,10 @@
 				<label for="endpoint">API key or endpoint address:</label>
 				<input type="text" id="endpoint" name="endpoint" title="API Key" class="form-control input-lg" placeholder="Your API Key or http:// endpoint" />
 			</div>
+			<div class="form-group">
+				<label for="endpoint">Response cache TTL, ms:</label>
+				<input type="text" id="cacheMaxAge" name="cacheMaxAge" title="Response cache TTL" class="form-control input-lg" placeholder="Response cache TTL in ms, e.g. 604800000 is one week" />
+			</div>
 		</div>
 	</div>
 

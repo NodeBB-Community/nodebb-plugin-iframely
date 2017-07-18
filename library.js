@@ -15,12 +15,11 @@ var url = require('url');
 var moment = require('moment');
 var crypto = require('crypto');
 
+var DEFAULT_CACHE_MAXAGE = 1000*60*60*24;	// one day
+
 var iframely = {
 	config: undefined,
 	apiBase: 'http://iframe.ly/api/iframely?origin=nodebb&align=left',
-	cache: LRU({
-		maxAge: 1000*60*60*24	// one day
-	}),
 	htmlRegex: /(?:<p>|^)<a.+?href="(.+?)".*?>(.*?)<\/a>(?:<br\/?>|<\/p>)/gm
 };
 var app;
@@ -39,9 +38,13 @@ iframely.init = function(params, callback) {
 		config.blacklist = (config.blacklist && config.blacklist.split(',')) || [];
 
 		iframely.config = config;
-	});
 
-	callback();
+		iframely.cache= LRU({
+			maxAge: getIntValue(config.cacheMaxAge, DEFAULT_CACHE_MAXAGE)
+		});
+
+		callback();
+	});
 };
 
 iframely.updateConfig = function(data) {
