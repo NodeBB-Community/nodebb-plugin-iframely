@@ -92,6 +92,8 @@ iframely.replace = function(raw, options, callback) {
 
 	} else {
 
+		var isPreview = !options || !options.isPost;
+
 		// Skip parsing post with negative votes.
 		if (options && options.isPost) {
 			var votes = (options && typeof options.votes === 'number') ? options.votes : 0;
@@ -147,7 +149,10 @@ iframely.replace = function(raw, options, callback) {
 					var embed = data.embed;
 					var match = data.match;
 					var url = data.url;
+					var fromCache = data.fromCache;
 					var embedHtml = embed.html;
+
+					var hideWidgetForPreview = isPreview && fromCache;
 
 					var generateCardWithImage = false;
 
@@ -215,6 +220,8 @@ iframely.replace = function(raw, options, callback) {
 
 					// END Format meta info.
 
+					embedHtml = wrapHtmlImages(embedHtml);
+
 					var context = {
 						show_title: false,
 						domain: getDomain(embed),
@@ -224,9 +231,10 @@ iframely.replace = function(raw, options, callback) {
 						embed: embed,
 						url: url,
 						metaString: meta.length ? meta.join('&nbsp;&nbsp;/&nbsp;&nbsp;') : false,
-						embedHtml: wrapHtmlImages(embedHtml),
+						embedHtml: embedHtml,
 						embedIsImg: /^<img[^>]+>$/.test(embedHtml),
-						image: generateCardWithImage
+						image: generateCardWithImage,
+						hideWidgetForPreview: hideWidgetForPreview
 					};
 
 					if (context.title && embed.rel.indexOf('player') > -1 && embed.rel.indexOf('gifv') === -1) {
@@ -236,6 +244,10 @@ iframely.replace = function(raw, options, callback) {
 					if (embed.rel.indexOf('file') > -1 && embed.rel.indexOf('reader') > -1) {
 						context.title = embed.meta.canonical;
 						context.show_title = true;
+					}
+
+					if (hideWidgetForPreview) {
+						context.embedHtmlEscaped = validator.escape(embedHtml);
 					}
 
 					function renderWidgetWrapper(err, embed_widget) {
@@ -285,7 +297,8 @@ iframely.query = function(data, callback) {
 				callback(null, {
 					url: data.url,
 					match: data.match,
-					embed: iframely.cache.get(data.url)
+					embed: iframely.cache.get(data.url),
+					fromCache: true
 				});
 			} catch(ex) {
 				winston.error('[plugin/iframely] Could not parse embed! ' + ex);
@@ -320,7 +333,8 @@ iframely.query = function(data, callback) {
 							callback(null, {
 								url: data.url,
 								match: data.match,
-								embed: body
+								embed: body,
+								fromCache: false
 							});
 						} catch(ex) {
 							winston.error('[plugin/iframely] Could not parse embed! ' + ex);

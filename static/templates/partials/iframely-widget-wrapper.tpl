@@ -19,7 +19,25 @@
 				{widget_html}
 			</a>
 		<!-- ELSE -->
-			{widget_html}
+
+			<!-- IF hideWidgetForPreview -->
+				<script>
+					function showIframelyPreview(that) {
+						var $parent = $(that).parent();
+						var html = $parent.attr('data-html');
+						$parent.html(html);
+						return false;
+					}
+				</script>
+				<div data-html="{embedHtmlEscaped}">
+					[Widget placeholder, <a href="#" onclick="return showIframelyPreview(this);">click to preview.</a>]
+				</div>
+
+			<!-- ELSE -->
+				{widget_html}
+			<!-- ENDIF hideWidgetForPreview -->
+
 		<!-- ENDIF embedIsImg -->
 	</div>
+
 </div>
