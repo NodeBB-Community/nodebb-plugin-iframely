@@ -225,6 +225,7 @@ iframely.replace = function(raw, options, callback) {
 						url: url,
 						metaString: meta.length ? meta.join('&nbsp;&nbsp;/&nbsp;&nbsp;') : false,
 						embedHtml: wrapHtmlImages(embedHtml),
+						embedIsImg: /^<img[^>]+>$/.test(embedHtml),
 						image: generateCardWithImage
 					};
 

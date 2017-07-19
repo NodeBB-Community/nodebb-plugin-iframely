@@ -14,6 +14,12 @@
 	<!-- ENDIF show_title -->
 
 	<div class="iframely-container">
-		{widget_html}
+		<!-- IF embedIsImg -->
+			<a href="{url}" target="_blank" rel="nofollow">
+				{widget_html}
+			</a>
+		<!-- ELSE -->
+			{widget_html}
+		<!-- ENDIF embedIsImg -->
 	</div>
 </div>
