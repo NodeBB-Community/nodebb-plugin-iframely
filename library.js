@@ -225,11 +225,12 @@ iframely.replace = function(raw, options, callback) {
 					// END Format meta info.
 
 					embedHtml = wrapHtmlImages(embedHtml);
+					var title = validator.escape(shortenText(embed.meta.title, 200));
 
 					var context = {
 						show_title: false,
 						domain: getDomain(embed),
-						title: validator.escape(shortenText(embed.meta.title, 200)),
+						title: title && title || false,
 						description: validator.escape(shortenText(embed.meta.description, 300)),
 						favicon: wrapImage(embed.links.icon && embed.links.icon[0].href) || false,
 						embed: embed,
@@ -342,7 +343,6 @@ iframely.query = function(data, callback) {
 							});
 						} catch(ex) {
 							winston.error('[plugin/iframely] Could not parse embed! ' + ex);
-							callback();
 						}
 					} else {
 						callback();

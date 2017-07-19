@@ -30,7 +30,11 @@
 					}
 				</script>
 				<div data-html="{embedHtmlEscaped}">
-					[Widget placeholder, <a href="#" onclick="return showIframelyPreview(this);">click to preview.</a>]
+					<a href="#" onclick="return showIframelyPreview(this);">[{domain}:
+						<!-- IF title -->
+							{title},
+						<!-- ENDIF title -->
+					click to preview]</a>
 				</div>
 
 			<!-- ELSE -->
