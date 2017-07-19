@@ -187,6 +187,9 @@ iframely.replace = function(raw, options, callback) {
 							return;
 						}
 					}
+					if (/^<img[^>]+>$/.exec(embedHtml)) {
+						embedHtml = '<a href="' + validator.escape(url) + '">' + embedHtml + '</a>';
+					}
 
 					// Format meta info.
 					var meta = [];
