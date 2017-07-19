@@ -42,6 +42,10 @@ iframely.init = function(params, callback) {
 
 		var cacheMaxAgeDays = getIntValue(config.cacheMaxAgeDays, DEFAULT_CACHE_MAX_AGE_DAYS);
 
+		if (cacheMaxAgeDays < DEFAULT_CACHE_MAX_AGE_DAYS) {
+			cacheMaxAgeDays = DEFAULT_CACHE_MAX_AGE_DAYS;
+		}
+
 		iframely.cache= LRU({
 			maxAge: cacheMaxAgeDays * ONE_DAY_MS
 		});
