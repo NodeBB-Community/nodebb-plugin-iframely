@@ -21,7 +21,7 @@ var DEFAULT_CACHE_MAX_AGE_DAYS = 1;
 var iframely = {
 	config: undefined,
 	apiBase: 'http://iframe.ly/api/iframely?origin=nodebb&align=left',
-	htmlRegex: /(?:<p>|^)<a.+?href="(.+?)".*?>(.*?)<\/a>(?:<br\/?>|<\/p>)/gm
+	htmlRegex: /(?:<p>|^)<a.+?href="(.+?)".*?>(.*?)<\/a>(?:<br\s*\/?>|<\/p>)/gm
 };
 var app;
 
@@ -113,7 +113,7 @@ iframely.replace = function(raw, options, callback) {
 		// Isolate matches
 		while(match = iframely.htmlRegex.exec(raw)) {
 			// Only match if it is a naked link (no anchor text)
-                        
+
 			var target;
 			try {
 				target = url.parse(match[1]);
