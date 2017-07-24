@@ -10,20 +10,22 @@
 
             <!-- IF title -->
             <h4 class="media-heading">
-                <a href="{embed.url}" target="_blank" rel="nofollow" class="one-line">
+                <a href="{url}" target="_blank" rel="nofollow" class="one-line">
                     <!-- IF favicon -->
-                    <img src="{favicon}" class="thumb pull-left" />
+                    <img src="{favicon}" class="thumb pull-left not-responsive" />
                     <!-- ENDIF favicon -->
                     {title}
                 </a>
             </h4>
             <!-- ENDIF title -->
 
-            <!-- IF embedHtml -->
+            <!-- IF image -->
             <div class="media">
-                {embedHtml}
+                <a href="{url}" target="_blank" rel="nofollow">
+                    <img src="{image}" alt="{title}" />
+                </a>
             </div>
-            <!-- ENDIF embedHtml -->
+            <!-- ENDIF image -->
 
             <!-- IF description -->
             <p class="description">

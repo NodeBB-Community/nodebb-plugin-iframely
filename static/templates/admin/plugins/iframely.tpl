@@ -14,6 +14,10 @@
 				<label for="endpoint">API key or endpoint address:</label>
 				<input type="text" id="endpoint" name="endpoint" title="API Key" class="form-control input-lg" placeholder="Your API Key or http:// endpoint" />
 			</div>
+			<div class="form-group">
+				<label for="endpoint">Cache Time-To-Live, days:</label>
+				<input type="text" id="cacheMaxAgeDays" name="cacheMaxAgeDays" title="Cache Time-To-Live, days" class="form-control input-lg" placeholder="Number of days to keep Iframely API data in memory cache, default 1 day" />
+			</div>
 		</div>
 	</div>
 

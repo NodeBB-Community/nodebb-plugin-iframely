@@ -1,29 +1,29 @@
 "use strict";
 
-var controllers = require('./lib/controllers'),
-	meta = module.parent.require('./meta'),
-	request = module.parent.require('request'),
-	async = module.parent.require('async'),
-	nconf = module.parent.require('nconf'),
-	winston = module.parent.require('winston'),
-	meta = require.main.require('./src/meta'),
+var controllers = require('./lib/controllers');
+var meta = module.parent.require('./meta');
+var request = module.parent.require('request');
+var async = module.parent.require('async');
+var nconf = module.parent.require('nconf');
+var winston = module.parent.require('winston');
+var validator = module.parent.require('validator');
+var meta = require.main.require('./src/meta');
 
-	postCache = module.parent.require('./posts/cache'),
-	LRU = require('lru-cache'),
-	url = require('url'),
-	moment = require('moment'),
-    crypto = require('crypto'),
+var postCache = module.parent.require('./posts/cache');
+var LRU = require('lru-cache');
+var url = require('url');
+var moment = require('moment');
+var crypto = require('crypto');
 
-	iframely = {
-		config: undefined,
-		apiBase: 'http://iframe.ly/api/iframely?origin=nodebb&align=left',
-		cache: LRU({
-			maxAge: 1000*60*60*24	// one day
-		}),
-		htmlRegex: /<a.+?href="(.+?)".*?>(.*?)<\/a>/g
-	},
-	app;
+var ONE_DAY_MS = 1000*60*60*24;
+var DEFAULT_CACHE_MAX_AGE_DAYS = 1;
 
+var iframely = {
+	config: undefined,
+	apiBase: 'http://iframe.ly/api/iframely?origin=nodebb&align=left',
+	htmlRegex: /(?:<p>|^)<a.+?href="(.+?)".*?>(.*?)<\/a>(?:<br\s*\/?>|<\/p>)/gm
+};
+var app;
 
 iframely.init = function(params, callback) {
 	var router = params.router,
@@ -39,9 +39,19 @@ iframely.init = function(params, callback) {
 		config.blacklist = (config.blacklist && config.blacklist.split(',')) || [];
 
 		iframely.config = config;
-	});
 
-	callback();
+		var cacheMaxAgeDays = getIntValue(config.cacheMaxAgeDays, DEFAULT_CACHE_MAX_AGE_DAYS);
+
+		if (cacheMaxAgeDays < DEFAULT_CACHE_MAX_AGE_DAYS) {
+			cacheMaxAgeDays = DEFAULT_CACHE_MAX_AGE_DAYS;
+		}
+
+		iframely.cache= LRU({
+			maxAge: cacheMaxAgeDays * ONE_DAY_MS
+		});
+
+		callback();
+	});
 };
 
 iframely.updateConfig = function(data) {
@@ -86,6 +96,8 @@ iframely.replace = function(raw, options, callback) {
 
 	} else {
 
+		var isPreview = !options || !options.isPost;
+
 		// Skip parsing post with negative votes.
 		if (options && options.isPost) {
 			var votes = (options && typeof options.votes === 'number') ? options.votes : 0;
@@ -94,15 +106,20 @@ iframely.replace = function(raw, options, callback) {
 			}
 		}
 
-		var urls = [],
-			urlsDict = {},
-			match;
+		var urls = [];
+		var urlsDict = {};
+		var match;
 
 		// Isolate matches
 		while(match = iframely.htmlRegex.exec(raw)) {
 			// Only match if it is a naked link (no anchor text)
 
-			var target = url.parse(match[1]);
+			var target;
+			try {
+				target = url.parse(match[1]);
+			} catch (err) {
+				target = '';
+			}
 
 			if ((
 				(match[1] === match[2]) ||
@@ -114,7 +131,8 @@ iframely.replace = function(raw, options, callback) {
 				var uri = match[1];
 
 				// Eliminate duplicates and internal links
-				if (!(uri in urlsDict) && uri.indexOf(nconf.get('url')) !== 0) {
+				if (!(uri in urlsDict) && !isInternalLink(target)) {
+					urlsDict[uri] = true;
 					urls.push({
 						match: match[0],
 						url: uri
@@ -134,19 +152,30 @@ iframely.replace = function(raw, options, callback) {
 
 					var embed = data.embed;
 					var match = data.match;
+					var url = data.url;
+					var fromCache = data.fromCache;
 					var embedHtml = embed.html;
 
-					var generateCard = false;
+					var hideWidgetForPreview = isPreview && fromCache;
+
+					var generateCardWithImage = false;
 
 					if (!embedHtml) {
 						var image = getImage(embed);
 						if (image) {
 							// Generate own card with thumbnail.
-							generateCard = true;
-							embedHtml = '<img src="' + image + '" />';
+							generateCardWithImage = image;
 						} else {
+
+							var icon = (embed.links.icon && embed.links.icon.length && embed.links.icon[0].href) || false;
+
 							// No embed code. Show link with title only.
-							app.render('partials/iframely-link-title', {embed: embed}, function (err, parsed) {
+							app.render('partials/iframely-link-title', {
+								title: embed.meta.title || url,
+								embed: embed,
+								icon: icon,
+								url: url
+							}, function (err, parsed) {
 
 								if (err) {
 									winston.error('[plugin/iframely] Could not parse embed: ' + err.message);
@@ -162,7 +191,7 @@ iframely.replace = function(raw, options, callback) {
 					// Format meta info.
 					var meta = [];
 
-					if (generateCard) {
+					if (generateCardWithImage) {
 						if (embed.meta.author) {
 							meta.push(embed.meta.author);
 						}
@@ -195,15 +224,22 @@ iframely.replace = function(raw, options, callback) {
 
 					// END Format meta info.
 
+					embedHtml = wrapHtmlImages(embedHtml);
+					var title = validator.escape(shortenText(embed.meta.title, 200));
+
 					var context = {
 						show_title: false,
 						domain: getDomain(embed),
-						title: shortenText(embed.meta.title, 200),
-						description: shortenText(embed.meta.description, 300),
+						title: title && title || false,
+						description: validator.escape(shortenText(embed.meta.description, 300)),
 						favicon: wrapImage(embed.links.icon && embed.links.icon[0].href) || false,
 						embed: embed,
+						url: url,
 						metaString: meta.length ? meta.join('&nbsp;&nbsp;/&nbsp;&nbsp;') : false,
-						embedHtml: wrapHtmlImages(embedHtml)
+						embedHtml: embedHtml,
+						embedIsImg: /^<img[^>]+>$/.test(embedHtml),
+						image: generateCardWithImage,
+						hideWidgetForPreview: hideWidgetForPreview
 					};
 
 					if (context.title && embed.rel.indexOf('player') > -1 && embed.rel.indexOf('gifv') === -1) {
@@ -213,6 +249,10 @@ iframely.replace = function(raw, options, callback) {
 					if (embed.rel.indexOf('file') > -1 && embed.rel.indexOf('reader') > -1) {
 						context.title = embed.meta.canonical;
 						context.show_title = true;
+					}
+
+					if (hideWidgetForPreview) {
+						context.embedHtmlEscaped = validator.escape(embedHtml);
 					}
 
 					function renderWidgetWrapper(err, embed_widget) {
@@ -234,7 +274,7 @@ iframely.replace = function(raw, options, callback) {
 						});
 					}
 
-					if (generateCard) {
+					if (generateCardWithImage) {
 						app.render('partials/iframely-widget-card', context, renderWidgetWrapper);
 					} else {
 						renderWidgetWrapper(null, context.embedHtml);
@@ -260,8 +300,10 @@ iframely.query = function(data, callback) {
 		setImmediate(function() {
 			try {
 				callback(null, {
+					url: data.url,
 					match: data.match,
-					embed: iframely.cache.get(data.url)
+					embed: iframely.cache.get(data.url),
+					fromCache: true
 				});
 			} catch(ex) {
 				winston.error('[plugin/iframely] Could not parse embed! ' + ex);
@@ -276,7 +318,7 @@ iframely.query = function(data, callback) {
 			var custom_endpoint = /^https?:\/\//i.test(iframely.config.endpoint);
 
 			var iframelyAPI = custom_endpoint ? iframely.config.endpoint : iframely['apiBase'] + '&api_key=' + iframely.config.endpoint;
-			iframelyAPI += (iframelyAPI.indexOf('?') > -1 ? '&' : '?') + 'url=' + data.url;
+			iframelyAPI += (iframelyAPI.indexOf('?') > -1 ? '&' : '?') + 'url=' + encodeURIComponent(data.url);
 
 			if (custom_endpoint) {
 				iframelyAPI += '&group=true';
@@ -294,12 +336,13 @@ iframely.query = function(data, callback) {
 						iframely.cache.set(data.url, body);
 						try {
 							callback(null, {
+								url: data.url,
 								match: data.match,
-								embed: body
+								embed: body,
+								fromCache: false
 							});
 						} catch(ex) {
 							winston.error('[plugin/iframely] Could not parse embed! ' + ex);
-							callback();
 						}
 					} else {
 						callback();
@@ -461,6 +504,19 @@ function getDate(date) {
 function getImage(embed) {
 	var image = (embed.links.thumbnail && embed.links.thumbnail[0]) || (embed.links.image && embed.links.image[0]);
 	return image && image.href;
+}
+
+var forumURL = url.parse(nconf.get('url'));
+var uploadsURL = url.parse(url.resolve(nconf.get('url'), nconf.get('upload_url')));
+
+function isInternalLink(target) {
+	if (target.host !== forumURL.host || target.path.indexOf(forumURL.path) !== 0) {
+		return false;
+	}
+	if (target.host !== uploadsURL.host || target.path.indexOf(uploadsURL.path) !== 0) {
+		return true;
+	}
+	return false;
 }
 
 module.exports = iframely;
