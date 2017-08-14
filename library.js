@@ -251,10 +251,6 @@ iframely.replace = function(raw, options, callback) {
 						context.show_title = true;
 					}
 
-					if (hideWidgetForPreview) {
-						context.embedHtmlEscaped = validator.escape(embedHtml);
-					}
-
 					function renderWidgetWrapper(err, embed_widget) {
 
 						if (err) {
@@ -262,7 +258,13 @@ iframely.replace = function(raw, options, callback) {
 							return next(null, html);
 						}
 
+						embed_widget = embed_widget ? embed_widget : false;
+
 						context.widget_html = embed_widget;
+
+						if (hideWidgetForPreview && embed_widget) {
+							context.embedHtmlEscaped = validator.escape(embed_widget);
+						}
 
 						app.render('partials/iframely-widget-wrapper', context, function (err, parsed) {
 							if (err) {
@@ -307,7 +309,6 @@ iframely.query = function(data, callback) {
 				});
 			} catch(ex) {
 				winston.error('[plugin/iframely] Could not parse embed! ' + ex);
-				callback();
 			}
 		});
 	} else {
@@ -502,7 +503,7 @@ function getDate(date) {
 }
 
 function getImage(embed) {
-	var image = (embed.links.thumbnail && embed.links.thumbnail[0]) || (embed.links.image && embed.links.image[0]);
+	var image = embed && embed.links && ((embed.links.thumbnail && embed.links.thumbnail[0]) || (embed.links.image && embed.links.image[0]));
 	return image && image.href;
 }
 
