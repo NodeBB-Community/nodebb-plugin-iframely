@@ -309,7 +309,6 @@ iframely.query = function(data, callback) {
 				});
 			} catch(ex) {
 				winston.error('[plugin/iframely] Could not parse embed! ' + ex);
-				callback();
 			}
 		});
 	} else {
@@ -504,7 +503,7 @@ function getDate(date) {
 }
 
 function getImage(embed) {
-	var image = (embed.links.thumbnail && embed.links.thumbnail[0]) || (embed.links.image && embed.links.image[0]);
+	var image = embed && embed.links && ((embed.links.thumbnail && embed.links.thumbnail[0]) || (embed.links.image && embed.links.image[0]));
 	return image && image.href;
 }
 
