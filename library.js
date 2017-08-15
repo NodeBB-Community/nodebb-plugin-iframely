@@ -156,6 +156,10 @@ iframely.replace = function(raw, options, callback) {
 					var fromCache = data.fromCache;
 					var embedHtml = embed.html;
 
+					if (!embed.meta) {
+						embed.meta = {};
+					}
+
 					var hideWidgetForPreview = isPreview && fromCache;
 
 					var generateCardWithImage = false;
