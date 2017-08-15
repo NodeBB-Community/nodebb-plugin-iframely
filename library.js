@@ -160,14 +160,14 @@ iframely.replace = function(raw, options, callback) {
 
 					var generateCardWithImage = false;
 
+					var icon = getIcon(embed);
+
 					if (!embedHtml) {
 						var image = getImage(embed);
 						if (image) {
 							// Generate own card with thumbnail.
 							generateCardWithImage = image;
 						} else {
-
-							var icon = (embed.links.icon && embed.links.icon.length && embed.links.icon[0].href) || false;
 
 							// No embed code. Show link with title only.
 							app.render('partials/iframely-link-title', {
@@ -232,7 +232,7 @@ iframely.replace = function(raw, options, callback) {
 						domain: getDomain(embed),
 						title: title && title || false,
 						description: validator.escape(shortenText(embed.meta.description, 300)),
-						favicon: wrapImage(embed.links.icon && embed.links.icon[0].href) || false,
+						favicon: wrapImage(icon),
 						embed: embed,
 						url: url,
 						metaString: meta.length ? meta.join('&nbsp;&nbsp;/&nbsp;&nbsp;') : false,
@@ -503,8 +503,32 @@ function getDate(date) {
 }
 
 function getImage(embed) {
-	var image = embed && embed.links && ((embed.links.thumbnail && embed.links.thumbnail[0]) || (embed.links.image && embed.links.image[0]));
+
+	var image =
+		embed
+		&& embed.links
+
+		&& ((embed.links.thumbnail
+		&& embed.links.thumbnail.length
+		&& embed.links.thumbnail[0])
+
+		|| (embed.links.image
+		&& embed.links.image.length
+		&& embed.links.image[0]));
+
 	return image && image.href;
+}
+
+function getIcon(embed) {
+
+	var icon =
+		embed
+		&& embed.links
+		&& embed.links.icon
+		&& embed.links.icon.length
+		&& embed.links.icon[0];
+
+	return icon && icon.href || false;
 }
 
 var forumURL = url.parse(nconf.get('url'));
