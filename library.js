@@ -1,7 +1,6 @@
 "use strict";
 
 var controllers = require('./lib/controllers');
-var meta = module.parent.require('./meta');
 var request = module.parent.require('request');
 var async = module.parent.require('async');
 var nconf = module.parent.require('nconf');
