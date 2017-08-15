@@ -181,7 +181,7 @@ iframely.replace = function(raw, options, callback) {
 							}, function (err, parsed) {
 
 								if (err) {
-									winston.error('[plugin/iframely] Could not parse embed: ' + err.message);
+									winston.error('[plugin/iframely] Could not parse embed: ' + err.message + '. Url: ' + url);
 									return next(null, html);
 								}
 
@@ -257,7 +257,7 @@ iframely.replace = function(raw, options, callback) {
 					function renderWidgetWrapper(err, embed_widget) {
 
 						if (err) {
-							winston.error('[plugin/iframely] Could not parse embed: ' + err.message);
+							winston.error('[plugin/iframely] Could not parse embed: ' + err.message + '. Url: ' + url);
 							return next(null, html);
 						}
 
@@ -271,7 +271,7 @@ iframely.replace = function(raw, options, callback) {
 
 						app.render('partials/iframely-widget-wrapper', context, function (err, parsed) {
 							if (err) {
-								winston.error('[plugin/iframely] Could not parse embed! ' + err.message);
+								winston.error('[plugin/iframely] Could not parse embed! ' + err.message + '. Url: ' + url);
 								return next(null, html);
 							}
 
@@ -291,7 +291,7 @@ iframely.replace = function(raw, options, callback) {
 		], function(error, html) {
 
 			if (error) {
-				winston.error('[plugin/iframely] Could not parse embed! ' + err.message);
+				winston.error('[plugin/iframely] Could not parse embed! ' + err.message + '. Urls: ' + urls);
 			}
 
 			callback(null, html);
@@ -311,7 +311,7 @@ iframely.query = function(data, callback) {
 					fromCache: true
 				});
 			} catch(ex) {
-				winston.error('[plugin/iframely] Could not parse embed! ' + ex);
+				winston.error('[plugin/iframely] Could not parse embed! ' + ex + '. Url: ' + data.url);
 			}
 		});
 	} else {
@@ -346,7 +346,7 @@ iframely.query = function(data, callback) {
 								fromCache: false
 							});
 						} catch(ex) {
-							winston.error('[plugin/iframely] Could not parse embed! ' + ex);
+							winston.error('[plugin/iframely] Could not parse embed! ' + ex + '. Url: ' + data.url);
 						}
 					} else {
 						callback();
