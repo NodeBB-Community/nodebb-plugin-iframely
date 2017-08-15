@@ -192,36 +192,36 @@ iframely.replace = function(raw, options, callback) {
 					}
 
 					// Format meta info.
-					var meta = [];
+					var metaInfo = [];
 
 					if (generateCardWithImage) {
 						if (embed.meta.author) {
-							meta.push(embed.meta.author);
+							metaInfo.push(embed.meta.author);
 						}
 
 						var date = getDate(embed.meta.date);
 						if (date) {
-							meta.push(date);
+							metaInfo.push(date);
 						}
 
 						var currency = embed.meta.currency_code || embed.meta.currency;
 						var price = embed.meta.price ? (embed.meta.price + (currency ? (' ' + currency) : '')) : null;
 						if (price) {
-							meta.push(price);
+							metaInfo.push(price);
 						}
 
 						var duration = getDuration(embed.meta.duration);
 						if (duration) {
-							meta.push(duration);
+							metaInfo.push(duration);
 						}
 
 						var views = getViews(embed.meta.views);
 						if (views) {
-							meta.push(views);
+							metaInfo.push(views);
 						}
 
 						if (embed.meta.category) {
-							meta.push(embed.meta.category);
+							metaInfo.push(embed.meta.category);
 						}
 					}
 
@@ -238,7 +238,7 @@ iframely.replace = function(raw, options, callback) {
 						favicon: wrapImage(icon),
 						embed: embed,
 						url: url,
-						metaString: meta.length ? meta.join('&nbsp;&nbsp;/&nbsp;&nbsp;') : false,
+						metaString: metaInfo.length ? metaInfo.join('&nbsp;&nbsp;/&nbsp;&nbsp;') : false,
 						embedHtml: embedHtml,
 						embedIsImg: /^<img[^>]+>$/.test(embedHtml),
 						image: generateCardWithImage,
