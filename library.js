@@ -351,7 +351,7 @@ iframely.query = function(data, callback) {
 							winston.error('[plugin/iframely] Could not parse embed! ' + ex + '. Url: ' + data.url + '. Api call: ' + iframelyAPI);
 						}
 					} else {
-						winston.error('[plugin/iframely] iframely responed with error! ' + JSON.stringify(body) + '. Url: ' + data.url + '. Api call: ' + iframelyAPI);
+						winston.log('[plugin/iframely] iframely responded with error: ' + JSON.stringify(body) + '. Url: ' + data.url + '. Api call: ' + iframelyAPI);
 						callback();
 					}
 				}
