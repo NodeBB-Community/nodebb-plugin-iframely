@@ -10,7 +10,7 @@
 
             <!-- IF title -->
             <h4 class="media-heading">
-                <a href="{url}" target="_blank" rel="nofollow" class="one-line">
+                <a href="{url}" target="_blank" rel="nofollow noreferrer noopener" class="one-line">
                     <!-- IF favicon -->
                     <img src="{favicon}" class="thumb pull-left not-responsive" />
                     <!-- ENDIF favicon -->
@@ -21,7 +21,7 @@
 
             <!-- IF image -->
             <div class="media">
-                <a href="{url}" target="_blank" rel="nofollow">
+                <a href="{url}" target="_blank" rel="nofollow noreferrer noopener">
                     <img src="{image}" alt="{title}" />
                 </a>
             </div>
