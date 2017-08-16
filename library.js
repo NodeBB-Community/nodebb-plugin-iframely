@@ -155,10 +155,6 @@ iframely.replace = function(raw, options, callback) {
 					var fromCache = data.fromCache;
 					var embedHtml = embed.html;
 
-					if (!embed.meta) {
-						embed.meta = {};
-					}
-
 					var hideWidgetForPreview = isPreview && fromCache;
 
 					var generateCardWithImage = false;
@@ -333,7 +329,10 @@ iframely.query = function(data, callback) {
 				json: true
 			}, function(err, res, body) {
 				if (err) {
-					winston.error('[plugin/iframely] Encountered error querying Iframely API: ' + err.message);
+					winston.error('[plugin/iframely] Encountered error querying Iframely API: ' + err.message + '. Url: ' + data.url + '. Api call: ' + iframelyAPI);
+					return callback();
+				} else if (body && (!body.meta || !body.links)) {
+					winston.error('[plugin/iframely] Invalid Iframely API response: ' + err.message + '. Url: ' + data.url + '. Api call: ' + iframelyAPI + '. Body: ' + body);
 					return callback();
 				} else {
 					if (res.statusCode === 200 && body) {
@@ -346,7 +345,7 @@ iframely.query = function(data, callback) {
 								fromCache: false
 							});
 						} catch(ex) {
-							winston.error('[plugin/iframely] Could not parse embed! ' + ex + '. Url: ' + data.url);
+							winston.error('[plugin/iframely] Could not parse embed! ' + ex + '. Url: ' + data.url + '. Api call: ' + iframelyAPI);
 						}
 					} else {
 						callback();
