@@ -335,7 +335,7 @@ iframely.query = function(data, callback) {
 					if (res.statusCode === 200 && body) {
 
 						if (!body.meta || !body.links) {
-							winston.error('[plugin/iframely] Invalid Iframely API response. Url: ' + data.url + '. Api call: ' + iframelyAPI + '. Body: ' + body);
+							winston.error('[plugin/iframely] Invalid Iframely API response. Url: ' + data.url + '. Api call: ' + iframelyAPI + '. Body: ' + JSON.stringify(body));
 							return callback();
 						}
 
