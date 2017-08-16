@@ -331,11 +331,14 @@ iframely.query = function(data, callback) {
 				if (err) {
 					winston.error('[plugin/iframely] Encountered error querying Iframely API: ' + err.message + '. Url: ' + data.url + '. Api call: ' + iframelyAPI);
 					return callback();
-				} else if (body && (!body.meta || !body.links)) {
-					winston.error('[plugin/iframely] Invalid Iframely API response. Url: ' + data.url + '. Api call: ' + iframelyAPI + '. Body: ' + body);
-					return callback();
 				} else {
 					if (res.statusCode === 200 && body) {
+
+						if (!body.meta || !body.links) {
+							winston.error('[plugin/iframely] Invalid Iframely API response. Url: ' + data.url + '. Api call: ' + iframelyAPI + '. Body: ' + body);
+							return callback();
+						}
+
 						iframely.cache.set(data.url, body);
 						try {
 							callback(null, {
