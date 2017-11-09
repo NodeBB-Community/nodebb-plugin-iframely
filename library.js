@@ -332,6 +332,10 @@ iframely.query = function(data, callback) {
 					winston.error('[plugin/iframely] Encountered error querying Iframely API: ' + err.message + '. Url: ' + data.url + '. Api call: ' + iframelyAPI);
 					return callback();
 				} else {
+					if (res.statusCode === 404) {
+						winston.verbose('[plugin/iframely] not found: ' + data.url);
+						return callback();
+					}
 					if (res.statusCode === 200 && body) {
 
 						if (!body.meta || !body.links) {
