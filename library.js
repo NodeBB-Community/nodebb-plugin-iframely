@@ -36,6 +36,7 @@ iframely.init = function(params, callback) {
 	meta.settings.get('iframely', function(err, config) {
 
 		config.blacklist = (config.blacklist && config.blacklist.split(',')) || [];
+		config.whitelist = (config.whitelist && config.whitelist.split(',')) || [];
 		config.parseLimit = parseInt(config.parseLimit, 10) || 3;
 
 		iframely.config = config;
@@ -59,6 +60,7 @@ iframely.updateConfig = function(data) {
 		winston.verbose('[plugin/iframely] Config updated');
 		postCache.reset();
 		data.settings.blacklist = data.settings.blacklist.split(',');
+		data.settings.whitelist = data.settings.whitelist.split(',');
 		iframely.config = data.settings;
 	}
 };
@@ -139,7 +141,8 @@ iframely.replace = function(raw, options, callback) {
 					urlsDict[uri] = true;
 					urls.push({
 						match: match[0],
-						url: uri
+						url: uri, 
+						host: target.host
 					});
 				}
 			}
@@ -317,50 +320,46 @@ iframely.query = function(data, callback) {
 		});
 	} else {
 		winston.verbose('[plugin/iframely] Querying \'' + data.url + '\' via Iframely...')
-
-		if (iframely.config.endpoint) {
-
-			var custom_endpoint = /^https?:\/\//i.test(iframely.config.endpoint);
-
-			var iframelyAPI = custom_endpoint ? iframely.config.endpoint : iframely['apiBase'] + '&api_key=' + iframely.config.endpoint;
-			iframelyAPI += (iframelyAPI.indexOf('?') > -1 ? '&' : '?') + 'url=' + encodeURIComponent(data.url);
-
-			if (custom_endpoint) {
-				iframelyAPI += '&group=true';
+		if (iframely.config.endpoint || iframely.config.apikey) {
+			var useAPI = false;
+			var fallbackURL;
+			if (iframely.config.apikey && !iframely.config.endpoint) {
+				//Only api key is available, so lets use that
+				useAPI=true;
 			}
-
-			request({
-				url: iframelyAPI,
-				json: true
-			}, function(err, res, body) {
-				if (err) {
-					winston.error('[plugin/iframely] Encountered error querying Iframely API: ' + err.message + '. Url: ' + data.url + '. Api call: ' + iframelyAPI);
-					return callback();
-				} else {
-					if (res.statusCode === 200 && body) {
-
-						if (!body.meta || !body.links) {
-							winston.error('[plugin/iframely] Invalid Iframely API response. Url: ' + data.url + '. Api call: ' + iframelyAPI + '. Body: ' + JSON.stringify(body));
-							return callback();
-						}
-
-						iframely.cache.set(data.url, body);
-						try {
-							callback(null, {
-								url: data.url,
-								match: data.match,
-								embed: body,
-								fromCache: false
-							});
-						} catch(ex) {
-							winston.error('[plugin/iframely] Could not parse embed! ' + ex + '. Url: ' + data.url + '. Api call: ' + iframelyAPI);
-						}
-					} else {
-						winston.info('[plugin/iframely] iframely responded with error: ' + JSON.stringify(body) + '. Url: ' + data.url + '. Api call: ' + iframelyAPI);
-						callback();
+			else if (iframely.config.endpoint && !iframely.config.apikey) {
+				var custom_endpoint = /^https?:\/\//i.test(iframely.config.endpoint);
+				//backward compatibility, check if api key is in endpoint
+				if (!custom_endpoint) {
+					useAPI = true;
+					iframely.config.apikey = iframely.config.endpoint;
+				}
+			}
+			else {
+				//Both are available and there is no whitelist defined, so we use the api for everything
+				if (!iframely.config.whitelist) {
+					useAPI = true;
+				}
+				else {
+					//We have an apikey and a whitelist
+					if (hostInWhitelist(data.host)) {
+						useAPI = true;
 					}
 				}
-			});
+			}
+			var iframelyAPI = useAPI ? iframely['apiBase'] + '&api_key=' + iframely.config.apikey : iframely.config.endpoint;
+			iframelyAPI += (iframelyAPI.indexOf('?') > -1 ? '&' : '?') + 'url=' + encodeURIComponent(data.url);
+
+			if (!useAPI) {
+				iframelyAPI += '&group=true';
+			}
+			else if (iframely.config.endpoint) {
+				fallbackURL =  iframely.config.endpoint;
+				fallbackURL += (fallbackURL.indexOf('?') > -1 ? '&' : '?') + 'url=' + encodeURIComponent(data.url);
+				fallbackURL += '&group=true';
+			}
+			processRequest(iframelyAPI, fallbackURL, data, callback);
+
 		} else {
 			winston.error('[plugin/iframely] No API key or endpoint configured, skipping Iframely');
 			callback();
@@ -368,8 +367,64 @@ iframely.query = function(data, callback) {
 	}
 };
 
+function processRequest(iframelyAPI, fallBackURL, data, callback) {
+	request({
+		url: iframelyAPI,
+		json: true
+	}, function(err, res, body) {
+		if (err) {
+			winston.error('[plugin/iframely] Encountered error querying Iframely API: ' + err.message + '. Url: ' + data.url + '. Api call: ' + iframelyAPI);
+			if (fallBackURL) {
+				processRequest(fallBackURL, null, data, callback);
+			}
+			return callback();
+		} else {
+			if (res.statusCode === 404) {
+				winston.verbose('[plugin/iframely] not found: ' + data.url);
+				return callback();
+			}
+			if (res.statusCode === 200 && body) {
+
+				if (!body.meta || !body.links) {
+					winston.error('[plugin/iframely] Invalid Iframely API response. Url: ' + data.url + '. Api call: ' + iframelyAPI + '. Body: ' + JSON.stringify(body));
+					if (fallBackURL) {
+						processRequest(fallBackURL, null, data, callback);
+					}
+					return callback();
+				}
+
+				iframely.cache.set(data.url, body);
+				try {
+					callback(null, {
+						url: data.url,
+						match: data.match,
+						embed: body,
+						fromCache: false
+					});
+				} catch(ex) {
+					winston.error('[plugin/iframely] Could not parse embed! ' + ex + '. Url: ' + data.url + '. Api call: ' + iframelyAPI);
+				}
+			} else {
+				if (body && body.status === 404) {
+					winston.verbose('[plugin/iframely] not found: ' + data.url);
+					return callback();
+				}
+				winston.info('[plugin/iframely] iframely responded with error: ' + JSON.stringify(body) + '. Url: ' + data.url + '. Api call: ' + iframelyAPI);
+				if (fallBackURL) {
+					processRequest(fallBackURL, null, data, callback);
+				}
+				callback();
+			}
+		}
+	});
+
+}
 function hostInBlacklist(host) {
 	return iframely.config.blacklist && iframely.config.blacklist.indexOf(host) > -1;
+}
+
+function hostInWhitelist(host) {
+	return iframely.config.whitelist && iframely.config.whitelist.indexOf(host) > -1;
 }
 
 function wrapHtmlImages(html) {
