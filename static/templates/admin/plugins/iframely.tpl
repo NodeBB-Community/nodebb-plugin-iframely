@@ -11,8 +11,12 @@
 				</p>
 			</div>
 			<div class="form-group">
-				<label for="endpoint">API key or endpoint address:</label>
-				<input type="text" id="endpoint" name="endpoint" title="API Key" class="form-control input-lg" placeholder="Your API Key or http:// endpoint" />
+				<label for="endpoint">Endpoint address:</label>
+				<input type="text" id="endpoint" name="endpoint" title="End Point" class="form-control input-lg" placeholder="http:// endpoint" />
+			</div>
+			<div class="form-group">
+				<label for="endpoint">API key:</label>
+				<input type="text" id="apikey" name="apikey" title="API Key" class="form-control input-lg" placeholder="Your API Key" />
 			</div>
 			<div class="form-group">
 				<label for="endpoint">Cache Time-To-Live, days:</label>
@@ -45,6 +49,19 @@
 			<div class="form-group">
 				<label for="blacklist">Domains to skip:</label>
 				<input type="text" id="blacklist" name="blacklist" class="form-control" placeholder="www.domain.com" />
+			</div>
+		</div>
+
+	</div>
+	<div class="row">
+		<div class="col-sm-2 col-xs-12 settings-header">Whitelist domains for IFramely service</div>
+		<div class="col-sm-10 col-xs-12">
+			<p>
+				If set, Iframely will use the Iframely service with these domains.   
+			</p>
+			<div class="form-group">
+				<label for="whitelist">Domains for API Service:</label>
+				<input type="text" id="whitelist" name="whitelist" class="form-control" placeholder="www.domain.com" />
 			</div>
 		</div>
 
@@ -89,6 +106,7 @@
 			}
 
 			tagifyInput('#blacklist');
+			tagifyInput('#whitelist');
 		});
 
 		$('#save').on('click', function() {
