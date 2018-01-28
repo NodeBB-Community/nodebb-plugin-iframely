@@ -37,6 +37,7 @@ iframely.init = function(params, callback) {
 
 		config.blacklist = (config.blacklist && config.blacklist.split(',')) || [];
 		config.whitelist = (config.whitelist && config.whitelist.split(',')) || [];
+		config.parseLimit = parseInt(config.parseLimit, 10) || 3;
 
 		iframely.config = config;
 
@@ -46,7 +47,7 @@ iframely.init = function(params, callback) {
 			cacheMaxAgeDays = DEFAULT_CACHE_MAX_AGE_DAYS;
 		}
 
-		iframely.cache= LRU({
+		iframely.cache = LRU({
 			maxAge: cacheMaxAgeDays * ONE_DAY_MS
 		});
 
@@ -133,6 +134,10 @@ iframely.replace = function(raw, options, callback) {
 
 				// Eliminate duplicates and internal links
 				if (!(uri in urlsDict) && !isInternalLink(target)) {
+					if (Object.keys(urlsDict).length >= iframely.config.parseLimit) {
+						break;
+					}
+
 					urlsDict[uri] = true;
 					urls.push({
 						match: match[0],
