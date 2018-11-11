@@ -1,14 +1,14 @@
 "use strict";
 
 var controllers = require('./lib/controllers');
-var request = module.parent.require('request');
-var async = module.parent.require('async');
-var nconf = module.parent.require('nconf');
-var winston = module.parent.require('winston');
-var validator = module.parent.require('validator');
+var request = require.main.require('request');
+var async = require.main.require('async');
+var nconf = require.main.require('nconf');
+var winston = require.main.require('winston');
+var validator = require.main.require('validator');
 var meta = require.main.require('./src/meta');
 
-var postCache = module.parent.require('./posts/cache');
+var postCache = require.main.require('./src/posts/cache');
 var LRU = require('lru-cache');
 var url = require('url');
 var moment = require('moment');
