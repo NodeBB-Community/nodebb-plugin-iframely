@@ -29,7 +29,7 @@ iframely.init = function(params, callback) {
 		hostMiddleware = params.middleware;
 
 	app = params.app;
-		
+
 	router.get('/admin/plugins/iframely', hostMiddleware.admin.buildHeader, controllers.renderAdminPage);
 	router.get('/api/admin/plugins/iframely', controllers.renderAdminPage);
 
@@ -96,7 +96,6 @@ iframely.replace = function(raw, options, callback) {
 	} else {
 
 		var isPreview = !options || !options.isPost;
-
 		// Skip parsing post with negative votes.
 		if (options && options.isPost) {
 			var votes = (options && typeof options.votes === 'number') ? options.votes : 0;
@@ -160,31 +159,27 @@ iframely.replace = function(raw, options, callback) {
 					var generateCardWithImage = false;
 
 					var icon = getIcon(embed);
+					var image = getImage(embed);
+					if (image) {
+						generateCardWithImage = image;
+					}
+					if (!embedHtml && !image) {
+						// No embed code. Show link with title only.
+						app.render('partials/iframely-link-title', {
+							title: embed.meta.title || url,
+							embed: embed,
+							icon: icon,
+							url: url
+						}, function (err, parsed) {
 
-					if (!embedHtml) {
-						var image = getImage(embed);
-						if (image) {
-							// Generate own card with thumbnail.
-							generateCardWithImage = image;
-						} else {
+							if (err) {
+								winston.error('[plugin/iframely] Could not parse embed: ' + err.message + '. Url: ' + url);
+								return next(null, html);
+							}
 
-							// No embed code. Show link with title only.
-							app.render('partials/iframely-link-title', {
-								title: embed.meta.title || url,
-								embed: embed,
-								icon: icon,
-								url: url
-							}, function (err, parsed) {
-
-								if (err) {
-									winston.error('[plugin/iframely] Could not parse embed: ' + err.message + '. Url: ' + url);
-									return next(null, html);
-								}
-
-								next(null, html.replace(match, parsed));
-							});
-							return;
-						}
+							next(null, html.replace(match, parsed));
+						});
+						return;
 					}
 
 					// Format meta info.
