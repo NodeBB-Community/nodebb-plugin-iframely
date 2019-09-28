@@ -73,13 +73,11 @@ iframely.addAdminNavigation = function(header, callback) {
 };
 
 iframely.replace = function(raw, options, callback) {
-
 	if (typeof options === 'function') {
 		callback = options;
 	}
 
 	if (raw && typeof raw !== 'string' && raw.hasOwnProperty('postData') && raw.postData.hasOwnProperty('content')) {
-
 		/**
 		 *	If a post object is received (`filter:post.parse`),
 		 *	instead of a plain string, call self.
@@ -94,7 +92,6 @@ iframely.replace = function(raw, options, callback) {
 		});
 
 	} else {
-
 		var isPreview = !options || !options.isPost;
 		// Skip parsing post with negative votes.
 		if (options && options.isPost) {
@@ -111,7 +108,6 @@ iframely.replace = function(raw, options, callback) {
 		// Isolate matches
 		while(match = iframely.htmlRegex.exec(raw)) {
 			// Only match if it is a naked link (no anchor text)
-
 			var target;
 			try {
 				target = url.parse(match[1]);
@@ -140,14 +136,11 @@ iframely.replace = function(raw, options, callback) {
 		}
 
 		async.waterfall([
-
 			// Query urls from Iframely, in batches of 10
 			async.apply(async.mapLimit, urls, 10, iframely.query),
 
 			function(embeds, next) {
-
 				async.reduce(embeds.filter(Boolean), raw, function(html, data, next) {
-
 					var embed = data.embed;
 					var match = data.match;
 					var url = data.url;
@@ -171,7 +164,6 @@ iframely.replace = function(raw, options, callback) {
 							icon: icon,
 							url: url
 						}, function (err, parsed) {
-
 							if (err) {
 								winston.error('[plugin/iframely] Could not parse embed: ' + err.message + '. Url: ' + url);
 								return next(null, html);
@@ -246,7 +238,6 @@ iframely.replace = function(raw, options, callback) {
 					}
 
 					function renderWidgetWrapper(err, embed_widget) {
-
 						if (err) {
 							winston.error('[plugin/iframely] Could not parse embed: ' + err.message + '. Url: ' + url);
 							return next(null, html);
@@ -280,7 +271,6 @@ iframely.replace = function(raw, options, callback) {
 			}
 
 		], function(error, html) {
-
 			if (error) {
 				winston.error('[plugin/iframely] Could not parse embed! ' + err.message + '. Urls: ' + urls);
 			}
@@ -331,31 +321,25 @@ iframely.query = function(data, callback) {
 						winston.verbose('[plugin/iframely] not found: ' + data.url);
 						return callback();
 					}
-					if (res.statusCode === 200 && body) {
+					if (res.statusCode !== 200 || !body) {
+						winston.verbose('[plugin/iframely] iframely responded with error: ' + JSON.stringify(body) + '. Url: ' + data.url + '. Api call: ' + iframelyAPI);
+						return callback();
+					}
+					if (!body.meta || !body.links) {
+						winston.error('[plugin/iframely] Invalid Iframely API response. Url: ' + data.url + '. Api call: ' + iframelyAPI + '. Body: ' + JSON.stringify(body));
+						return callback();
+					}
 
-						if (!body.meta || !body.links) {
-							winston.error('[plugin/iframely] Invalid Iframely API response. Url: ' + data.url + '. Api call: ' + iframelyAPI + '. Body: ' + JSON.stringify(body));
-							return callback();
-						}
-
-						iframely.cache.set(data.url, body);
-						try {
-							callback(null, {
-								url: data.url,
-								match: data.match,
-								embed: body,
-								fromCache: false
-							});
-						} catch(ex) {
-							winston.error('[plugin/iframely] Could not parse embed! ' + ex + '. Url: ' + data.url + '. Api call: ' + iframelyAPI);
-						}
-					} else {
-						if (body && body.status === 404) {
-							winston.verbose('[plugin/iframely] not found: ' + data.url);
-							return callback();
-						}
-						winston.info('[plugin/iframely] iframely responded with error: ' + JSON.stringify(body) + '. Url: ' + data.url + '. Api call: ' + iframelyAPI);
-						callback();
+					iframely.cache.set(data.url, body);
+					try {
+						callback(null, {
+							url: data.url,
+							match: data.match,
+							embed: body,
+							fromCache: false
+						});
+					} catch(ex) {
+						winston.error('[plugin/iframely] Could not parse embed! ' + ex + '. Url: ' + data.url + '. Api call: ' + iframelyAPI);
 					}
 				}
 			});
