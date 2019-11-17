@@ -22,6 +22,16 @@
 	</div>
 
 	<div class="row">
+		<div class="col-sm-2 col-xs-12 settings-header">Limits</div>
+		<div class="col-sm-10 col-xs-12">
+			<div class="form-group">
+				<label for="parseLimit">Maximum number of links to parse (per post):</label>
+				<input type="number" id="parseLimit" name="parseLimit" title="Parsing Limit (per post)" class="form-control input-lg" placeholder="3" />
+			</div>
+		</div>
+	</div>
+
+	<div class="row">
 		<div class="col-sm-2 col-xs-12 settings-header">Disable parsing on negative votes</div>
 		<div class="col-sm-10 col-xs-12">
 			<div class="form-group">
