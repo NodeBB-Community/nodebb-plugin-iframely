@@ -62,6 +62,13 @@ iframely.updateConfig = function(data) {
 	}
 };
 
+iframely.sanitizeConfig = function(sanitizeConfig, callback) {
+	// Allow `embed.js` widget script.	
+    sanitizeConfig.allowedTags.push('script');
+    sanitizeConfig.allowedAttributes['script'] = ['async', 'src'];
+    callback(null, sanitizeConfig);
+}
+
 iframely.addAdminNavigation = function(header, callback) {
 	header.plugins.push({
 		route: '/plugins/iframely',
@@ -153,11 +160,18 @@ iframely.replace = function(raw, options, callback) {
 
 					var icon = getIcon(embed);
 					var image = getImage(embed);
-					if (image) {
+					var scriptSrc = getScriptSrc(embedHtml);
+					// Allow only `iframe.ly/embed.js` script.
+					var isIframelyWidget = scriptSrc && /iframe\.ly\/embed\.js$/.test(scriptSrc);
+					var isSanitized = !scriptSrc || isIframelyWidget;
+
+					if (embedHtml && isSanitized) {
+						// Render embedHtml.
+					} else if (image) {
+						// Render card with image.
 						generateCardWithImage = image;
-					}
-					if (!embedHtml && !image) {
-						// No embed code. Show link with title only.
+					} else {
+						// No embed code, no image. Show link with title only.
 						app.render('partials/iframely-link-title', {
 							title: embed.meta.title || url,
 							embed: embed,
@@ -522,6 +536,11 @@ function getIcon(embed) {
 		&& embed.links.icon[0];
 
 	return icon && icon.href || false;
+}
+
+function getScriptSrc(html) {
+	var scriptMatch = html && html.match(/<script[^>]+src="([^"]+)"/);
+	return scriptMatch && scriptMatch[1];
 }
 
 var forumURL = url.parse(nconf.get('url'));

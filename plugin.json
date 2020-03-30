@@ -6,6 +6,7 @@
 		{ "hook": "static:app.load", "method": "init" },
 		{ "hook": "filter:admin.header.build", "method": "addAdminNavigation" },
 		{ "hook": "action:settings.set", "method": "updateConfig" },
+		{ "hook": "filter:sanitize.config", "method": "sanitizeConfig" },
 		{ "hook": "filter:parse.raw", "method": "replace" },
 		{ "hook": "filter:parse.post", "method": "replace" }
 	],
