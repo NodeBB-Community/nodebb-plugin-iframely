@@ -163,9 +163,9 @@ iframely.replace = function(raw, options, callback) {
 					var scriptSrc = getScriptSrc(embedHtml);
 					// Allow only `iframe.ly/embed.js` script.
 					var isIframelyWidget = scriptSrc && (
-					   	/^https:\/\/(?:\w+\.)iframe\.ly\/embed\.js/.test(scriptSrc)
-						|| /^https:\/\/if-cdn\.com\/embed\.js/.test(scriptSrc)
-						|| /^https:\/\/iframely\.net\/embed\.js/.test(scriptSrc)
+					   	/^(?:https:)?\/\/(?:\w+\.)iframe\.ly\/embed\.js/.test(scriptSrc)
+						|| /^(?:https:)?\/\/if-cdn\.com\/embed\.js/.test(scriptSrc)
+						|| /^(?:https:)?\/\/iframely\.net\/embed\.js/.test(scriptSrc)
 					);
 
 					var isSanitized = !scriptSrc || isIframelyWidget;
