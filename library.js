@@ -62,13 +62,6 @@ iframely.updateConfig = function(data) {
 	}
 };
 
-iframely.sanitizeConfig = function(sanitizeConfig, callback) {
-	// Allow `embed.js` widget script.	
-    sanitizeConfig.allowedTags.push('script');
-    sanitizeConfig.allowedAttributes['script'] = ['async', 'src'];
-    callback(null, sanitizeConfig);
-}
-
 iframely.addAdminNavigation = function(header, callback) {
 	header.plugins.push({
 		route: '/plugins/iframely',

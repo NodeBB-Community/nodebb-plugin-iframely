@@ -22,21 +22,12 @@
 			<!-- ELSE -->
 
 				<!-- IF hideWidgetForPreview -->
-
-					<script>
-						function showIframelyPreview(that) {
-							var $parent = $(that).parent();
-							var html = $parent.attr('data-html');
-							$parent.html(html);
-							return false;
-						}
-					</script>
 					<div data-html="{embedHtmlEscaped}">
 						[<a href="{embed.meta.canonical}" target="_blank" rel="nofollow noreferrer noopener">{domain}</a>:
 						<!-- IF title -->
 						{title},
 						<!-- ENDIF title -->
-						<a href="#" onclick="return showIframelyPreview(this);">click to preview</a>]
+						<a href="#" data-iframely-show-preview>click to preview</a>]
 					</div>
 
 				<!-- ELSE -->
