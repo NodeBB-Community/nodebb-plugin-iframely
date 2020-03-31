@@ -9,8 +9,12 @@
 		{ "hook": "filter:parse.raw", "method": "replace" },
 		{ "hook": "filter:parse.post", "method": "replace" }
 	],
-	"less": [
-		"static/style.less"
+	"scripts": [
+		"node_modules/@iframely/embed.js/dist/embed.min.js",
+		"public/scripts/client.js"
 	],
-	"templates": "static/templates"
+	"less": [
+		"public/style.less"
+	],
+	"templates": "public/templates"
 }
