@@ -14,7 +14,7 @@
 		"public/scripts/client.js"
 	],
 	"less": [
-		"static/style.less"
+		"public/style.less"
 	],
-	"templates": "static/templates"
+	"templates": "public/templates"
 }
