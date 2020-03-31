@@ -10,7 +10,7 @@
 		{ "hook": "filter:parse.post", "method": "replace" }
 	],
 	"scripts": [
-		"node_modules/@iframely/embed.js/dist/embed.js",
+		"node_modules/@iframely/embed.js/dist/embed.min.js",
 		"public/scripts/client.js"
 	],
 	"less": [
