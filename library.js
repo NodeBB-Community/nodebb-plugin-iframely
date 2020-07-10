@@ -107,6 +107,13 @@ iframely.replace = function(raw, options, callback) {
 
 		// Isolate matches
 		while(match = iframely.htmlRegex.exec(raw)) {
+			// Eliminate trailing slashes for comparison purposes
+			[1, 2].forEach(key => {
+				if (match[key].endsWith('/')) {
+					match[key] = match[key].slice(0, -1);
+				}
+			});
+
 			// Only match if it is a naked link (no anchor text)
 			var target;
 			try {
