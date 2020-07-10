@@ -20,7 +20,7 @@ var DEFAULT_CACHE_MAX_AGE_DAYS = 1;
 var iframely = {
 	config: undefined,
 	apiBase: 'http://iframe.ly/api/iframely?origin=nodebb&align=left',
-	htmlRegex: /(?:<p.*?>|^)<a.+?href="(.+?)".*?>(.*?)<\/a>(?:<br\s*\/?>|<\/p>)/gm
+	htmlRegex: /(?:<p[^>]*>|<br\s*\/?>|^)<a.+?href="(.+?)".*?>(.*?)<\/a>(?:<br\s*\/?>|<\/p>)?/gm
 };
 var app;
 
