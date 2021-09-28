@@ -11,10 +11,13 @@
 	],
 	"scripts": [
 		"node_modules/@iframely/embed.js/dist/embed.min.js",
-		"public/scripts/client.js"
+		"client/client.js"
+	],
+	"acpScripts": [
+		"client/admin.js"
 	],
 	"less": [
-		"public/style.less"
+		"less/style.less"
 	],
-	"templates": "public/templates"
+	"templates": "templates"
 }
