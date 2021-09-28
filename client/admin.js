@@ -7,7 +7,9 @@ require(['settings'], function (Settings) {
 				confirmKeys: [13, 44],
 				trimValue: true,
 			});
-			$(input[0].$input).addClass('form-control').parent().css('display', 'block');
+			if (input[0]) {
+				$(input[0].$input).addClass('form-control').parent().css('display', 'block');
+			}
 		}
 
 		tagifyInput('#blacklist');
