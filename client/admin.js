@@ -1,21 +1,26 @@
 'use strict';
 
-require(['settings'], function (Settings) {
-	Settings.load('iframely', $('.iframely-settings'), function () {
-		function tagifyInput(selector) {
-			var input = $(selector).tagsinput({
-				confirmKeys: [13, 44],
-				trimValue: true,
-			});
-			if (input[0]) {
-				$(input[0].$input).addClass('form-control').parent().css('display', 'block');
+define('admin/plugins/iframely', ['settings'], function (Settings) {
+	var ACP = {};
+
+	ACP.init = function () {
+		Settings.load('iframely', $('.iframely-settings'), function () {
+			function tagifyInput(selector) {
+				var input = $(selector).tagsinput({
+					confirmKeys: [13, 44],
+					trimValue: true,
+				});
+				if (input[0]) {
+					$(input[0].$input).addClass('form-control').parent().css('display', 'block');
+				}
 			}
-		}
 
-		tagifyInput('#blacklist');
-	});
+			tagifyInput('#blacklist');
+		});
+		$('#save').on('click', saveSettings);
+	};
 
-	$('#save').on('click', function () {
+	function saveSettings() {
 		Settings.save('iframely', $('.iframely-settings'), function () {
 			app.alert({
 				type: 'success',
@@ -27,5 +32,7 @@ require(['settings'], function (Settings) {
 				},
 			});
 		});
-	});
+	}
+
+	return ACP;
 });
