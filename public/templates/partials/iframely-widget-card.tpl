@@ -21,7 +21,7 @@
 
             <!-- IF image -->
             <div class="media">
-                <a href="{url}" target="_blank" rel="nofollow noreferrer noopener">
+                <a href="{url}" aria-label="{title}" target="_blank" rel="nofollow noreferrer noopener">
                     <img src="{image}" alt="{title}" />
                 </a>
             </div>
