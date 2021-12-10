@@ -12,7 +12,7 @@
             <h4 class="media-heading">
                 <a href="{url}" target="_blank" rel="nofollow noreferrer noopener" class="one-line">
                     <!-- IF favicon -->
-                    <img src="{favicon}" class="thumb pull-left not-responsive" />
+                    <img src="{favicon}" class="thumb pull-left not-responsive" alt="" role="presentation" />
                     <!-- ENDIF favicon -->
                     {title}
                 </a>
