@@ -13,6 +13,9 @@
 		"node_modules/@iframely/embed.js/dist/embed.min.js",
 		"public/scripts/client.js"
 	],
+	"modules": {
+		"../admin/plugins/iframely.js": "public/scripts/admin.js"
+	},
 	"less": [
 		"public/style.less"
 	],
