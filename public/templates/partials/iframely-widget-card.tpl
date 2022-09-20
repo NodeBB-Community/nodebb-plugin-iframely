@@ -1,5 +1,5 @@
-<div class="panel panel-default panel-iframely">
-    <div class="panel-body">
+<div class="card panel-iframely">
+    <div class="card-body">
         <div class="media iframely-embed">
 
             <!-- IF metaString -->

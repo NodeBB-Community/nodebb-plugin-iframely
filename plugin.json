@@ -16,8 +16,8 @@
 	"modules": {
 		"../admin/plugins/iframely.js": "public/scripts/admin.js"
 	},
-	"less": [
-		"public/style.less"
+	"scss": [
+		"public/style.scss"
 	],
 	"templates": "public/templates"
 }
