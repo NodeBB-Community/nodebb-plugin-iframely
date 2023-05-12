@@ -1,6 +1,6 @@
 'use strict';
 
-define('admin/plugins/iframely', ['settings'], function (Settings) {
+define('admin/plugins/iframely', ['settings', 'alerts'], function (Settings, alerts) {
 	var admin = {};
 
 	admin.init = function () {
@@ -19,7 +19,7 @@ define('admin/plugins/iframely', ['settings'], function (Settings) {
 
 		$('#save').on('click', function() {
 			Settings.save('iframely', $('.iframely-settings'), function() {
-				app.alert({
+				alerts.alert({
 					type: 'success',
 					alert_id: 'iframely-saved',
 					title: 'Settings Saved',
