@@ -7,8 +7,10 @@ define('admin/plugins/iframely', ['settings', 'alerts'], function (Settings, ale
 		Settings.load('iframely', $('.iframely-settings'), function() {
 			function tagifyInput(selector) {
 				var input = $(selector).tagsinput({
+					tagClass: 'badge bg-info',
 					confirmKeys: [13, 44],
-					trimValue: true
+					trimValue: true,
+
 				});
 				$(input[0]['$input']).addClass('form-control').parent().css('display', 'block');
 
