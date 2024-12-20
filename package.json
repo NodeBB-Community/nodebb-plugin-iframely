@@ -1,6 +1,6 @@
 {
   "name": "nodebb-plugin-iframely",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Iframely will give you embeds from over 1700 domains, plus previews for the rest of the web.",
   "main": "library.js",
   "repository": {
