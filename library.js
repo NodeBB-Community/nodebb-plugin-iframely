@@ -1,7 +1,6 @@
 "use strict";
 
 var controllers = require('./lib/controllers');
-var request = require.main.require('request');
 var async = require.main.require('async');
 var nconf = require.main.require('nconf');
 var winston = require.main.require('winston');
@@ -328,19 +327,22 @@ iframely.query = function(data, callback) {
 				iframelyAPI += '&group=true';
 			}
 
-			request({
-				url: iframelyAPI,
-				json: true
-			}, function(err, res, body) {
-				if (err) {
-					winston.error('[plugin/iframely] Encountered error querying Iframely API: ' + err.message + '. Url: ' + data.url + '. Api call: ' + iframelyAPI);
+			fetch(iframelyAPI).catch(err => {
+				winston.error('[plugin/iframely] Encountered error querying Iframely API: ' + err.message + '. Url: ' + data.url + '. Api call: ' + iframelyAPI);
+				callback();
+			}).then(async (res) => {
+				if (!res.ok) {
+					winston.error('[plugin/iframely] Encountered error querying Iframely API: ' + res.status + '. Url: ' + data.url + '. Api call: ' + iframelyAPI);
 					return callback();
-				} else {
-					if (res.statusCode === 404) {
+				}
+				try {
+					if (res.status === 404) {
 						winston.verbose('[plugin/iframely] not found: ' + data.url);
 						return callback();
 					}
-					if (res.statusCode !== 200 || !body) {
+					let body = await res.json()
+
+					if (res.status !== 200 || !body) {
 						winston.verbose('[plugin/iframely] iframely responded with error: ' + JSON.stringify(body) + '. Url: ' + data.url + '. Api call: ' + iframelyAPI);
 						return callback();
 					}
@@ -350,16 +352,16 @@ iframely.query = function(data, callback) {
 					}
 
 					iframely.cache.set(data.url, body);
-					try {
-						callback(null, {
-							url: data.url,
-							match: data.match,
-							embed: body,
-							fromCache: false
-						});
-					} catch(ex) {
-						winston.error('[plugin/iframely] Could not parse embed! ' + ex + '. Url: ' + data.url + '. Api call: ' + iframelyAPI);
-					}
+
+					callback(null, {
+						url: data.url,
+						match: data.match,
+						embed: body,
+						fromCache: false
+					});
+				} catch (ex) {
+					winston.error('[plugin/iframely] Could not parse embed! ' + ex.stack + '. Url: ' + data.url + '. Api call: ' + iframelyAPI);
+					callback();
 				}
 			});
 		} else {
